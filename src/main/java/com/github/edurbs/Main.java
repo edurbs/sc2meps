@@ -4,6 +4,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.By;
 import org.openqa.selenium.chrome.ChromeDriver;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -42,39 +43,81 @@ public class Main {
             wait.until(webDriver -> ((org.openqa.selenium.JavascriptExecutor) driver)
                 .executeScript("return document.readyState").equals("complete"));
             
-            // Try multiple selectors for the first click
+            // Try multiple selectors for the first click (menu toggle)
             String[] firstClickSelectors = {
+                "button[aria-label='Toggle menu']",
                 ".whitespace-nowrap",
-                "summary div",
-                "details > summary > div"
+                "summary",
+                "details > summary",
+                "[role='button']",
+                "button"
             };
             
             boolean firstClickSuccess = false;
             for (String selector : firstClickSelectors) {
                 try {
-                    WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(selector)));
-                    element.click();
-                    firstClickSuccess = true;
-                    System.out.println("Clicked element with selector: " + selector);
-                    break;
+                    System.out.println("Trying selector: " + selector);
+                    // First try regular click
+                    try {
+                        WebElement element = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(selector)));
+                        ((JavascriptExecutor)driver).executeScript("arguments[0].scrollIntoView(true);", element);
+                        element.click();
+                        firstClickSuccess = true;
+                        System.out.println("Clicked element with selector: " + selector);
+                        Thread.sleep(1000); // Wait for any animations
+                        break;
+                    } catch (Exception e) {
+                        System.out.println("Regular click failed, trying JavaScript click...");
+                        // If regular click fails, try JavaScript click
+                        try {
+                            WebElement element = wait.until(ExpectedConditions.presenceOfElementLocated(By.cssSelector(selector)));
+                            ((JavascriptExecutor)driver).executeScript("arguments[0].click();", element);
+                            firstClickSuccess = true;
+                            System.out.println("Clicked element with JavaScript using selector: " + selector);
+                            Thread.sleep(1000); // Wait for any animations
+                            break;
+                        } catch (Exception jsE) {
+                            System.out.println("JavaScript click also failed for selector: " + selector);
+                        }
+                    }
                 } catch (Exception e) {
-                    System.out.println("Failed to click element with selector: " + selector);
+                    System.out.println("Failed to find or click element with selector: " + selector + " - " + e.getMessage());
                 }
             }
             
             if (!firstClickSuccess) {
-                throw new RuntimeException("Failed to click the first element with any selector");
+                // Try one last time with a more generic approach
+                try {
+                    System.out.println("Trying last resort click...");
+                    ((JavascriptExecutor)driver).executeScript(
+                        "document.querySelector('button, [role=button], summary, details > div').click();");
+                    firstClickSuccess = true;
+                    Thread.sleep(1000);
+                } catch (Exception e) {
+                    System.out.println("Last resort click failed: " + e.getMessage());
+                }
+                
+                if (!firstClickSuccess) {
+                    throw new RuntimeException("Failed to click the menu with any selector");
+                }
             }
             
-            // Wait for the menu to expand
-            Thread.sleep(2000);
+            // Wait for the menu to expand and GEN book to be visible
+            try {
+                wait.until(ExpectedConditions.visibilityOfElementLocated(
+                    By.xpath("//*[contains(text(), 'GEN') or contains(text(), 'Genesis')]")));
+                System.out.println("Menu expanded successfully");
+            } catch (Exception e) {
+                System.out.println("Menu might not have expanded as expected: " + e.getMessage());
+                // Continue anyway, as the element might still be clickable
+            }
             
             // Try multiple selectors for the second click (GEN book)
             String[] secondClickSelectors = {
                 "#GEN",
-                "[id='GEN']",
-                "span#GEN",
-                "div[role='button'] span:contains('GEN')"
+//                "[id='GEN']",
+//                "span#GEN",
+//                "div[role='button'] span:contains('GEN')"
             };
             
             boolean secondClickSuccess = false;
@@ -98,15 +141,21 @@ public class Main {
             }
             
             // Wait for the content to load after second click
-            Thread.sleep(3000);
+            try {
+                wait.until(ExpectedConditions.presenceOfElementLocated(
+                    By.xpath("//*[contains(text(), 'Genesis') or contains(@id, 'GEN')]")));
+                Thread.sleep(1000); // Additional wait for stability
+            } catch (Exception e) {
+                System.out.println("Warning: Content loading check failed: " + e.getMessage());
+            }
             
             // Try multiple selectors for the third click (Chapter 1)
             String[] thirdClickSelectors = {
-                "#1",
+//                "#1",
                 "[id='1']",
-                "span#1",
-                "div[role='button'] span:contains('1')",
-                ".grid-cols-6 > #\\31"  // CSS-escaped '1'
+//                "span#1",
+//                "div[role='button'] span:contains('1')",
+//                ".grid-cols-6 > #\\31"  // CSS-escaped '1'
             };
             
             boolean thirdClickSuccess = false;
@@ -134,10 +183,10 @@ public class Main {
             
             // Try different possible selectors for the chapter content
             String[] chapterSelectors = {
-                "[data-chapter='1']",  // Common pattern for chapter containers
-                "div.chapter-content",
-                "div.chapter",
-                "div[role='article']",
+//                "[data-chapter='1']",  // Common pattern for chapter containers
+//                "div.chapter-content",
+//                "div.chapter",
+//                "div[role='article']",
                 "article"
             };
             
@@ -180,42 +229,118 @@ public class Main {
                     System.out.println("JavaScript fallback failed: " + e.getMessage());
                 }
             }
+
             
-            // Print the chapter HTML
-            System.out.println("\nChapter HTML content (first 1000 chars):");
-            System.out.println(chapterHtml.substring(0, Math.min(1000, chapterHtml.length())));
-            System.out.println("\n... (content truncated) ...\n");
+            // Create a string builder to hold all chapters
+            StringBuilder allChaptersHtml = new StringBuilder();
             
-            // Save the full chapter HTML to a file
+            // Add HTML header
+            allChaptersHtml.append("<!DOCTYPE html>\n");
+            allChaptersHtml.append("<html><head>\n");
+            allChaptersHtml.append("<meta charset=\"UTF-8\">\n");
+            allChaptersHtml.append("<title>Genesis - First 3 Chapters</title>\n");
+            allChaptersHtml.append("<style>\n");
+            allChaptersHtml.append("body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }\n");
+            allChaptersHtml.append(".chapter { margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 20px; }\n");
+            allChaptersHtml.append("</style>\n");
+            allChaptersHtml.append("</head><body>\n");
+            allChaptersHtml.append("<h1>Genesis</h1>\n");
+            
+            // Add the first chapter we already have
+            allChaptersHtml.append("<div class='chapter' id='chapter-1'>\n");
+            allChaptersHtml.append("<h2>Chapter 1</h2>\n");
+            allChaptersHtml.append(chapterHtml);
+            allChaptersHtml.append("\n</div>\n");
+            
+            // Process remaining chapters (2-3)
+            for (int chapterNum = 2; chapterNum <= 3; chapterNum++) {
+                try {
+                    System.out.println("Processing Chapter " + chapterNum + "...");
+                    
+                    // First, refresh the page to ensure clean state
+                    System.out.println("Refreshing page...");
+                    driver.navigate().refresh();
+                    
+                    // Wait for the menu to be clickable and click it
+                    System.out.println("Clicking menu...");
+                    WebElement menuToggle = wait.until(ExpectedConditions.elementToBeClickable(
+                        By.cssSelector(".whitespace-nowrap")));
+                    menuToggle.click();
+                    
+                    // Wait for the GEN book and click it
+                    System.out.println("Clicking GEN book...");
+                    WebElement genBook = wait.until(ExpectedConditions.elementToBeClickable(By.id("GEN")));
+                    genBook.click();
+                    
+                    // Wait for the chapter list to be visible
+                    Thread.sleep(1000);
+                    
+                    // Click on the chapter number
+                    String chapterSelector = String.format("[id='%d']", chapterNum);
+                    System.out.println("Clicking chapter selector: " + chapterSelector);
+                    
+                    // Wait for the chapter link to be clickable and click it
+                    WebElement chapterLink = wait.until(ExpectedConditions.elementToBeClickable(
+                        By.cssSelector(chapterSelector)));
+                    chapterLink.click();
+                    
+                    // Wait for the content to be visible and not empty
+                    System.out.println("Waiting for content to load...");
+                    WebElement contentDiv = wait.until(
+                        ExpectedConditions.visibilityOfElementLocated(
+                            By.cssSelector("#content:not(:empty)")));
+                    
+                    // Wait a bit more for dynamic content to fully load
+                    Thread.sleep(2000);
+                    
+                    // Use JavaScript to get the complete content
+                    System.out.println("Extracting chapter content...");
+                    String chapterContent = (String) ((JavascriptExecutor) driver).executeScript(
+                        "return document.getElementById('content').innerHTML;");
+                    
+                    if (chapterContent == null || chapterContent.trim().isEmpty()) {
+                        System.out.println("Warning: Chapter content is empty! Trying alternative method...");
+                        // Try getting the content directly from the body
+                        chapterContent = (String) ((JavascriptExecutor) driver).executeScript(
+                            "return document.body.innerHTML;");
+                    }
+                    
+                    // Add the chapter to our collection
+                    allChaptersHtml.append(String.format("<div class='chapter' id='chapter-%d'>\n", chapterNum));
+                    allChaptersHtml.append(String.format("<h2>Chapter %d</h2>\n", chapterNum));
+                    allChaptersHtml.append(chapterContent);
+                    allChaptersHtml.append("\n</div>\n");
+                    
+                    System.out.println("Added Chapter " + chapterNum);
+                    
+                } catch (Exception e) {
+                    System.err.println("Error processing Chapter " + chapterNum + ": " + e.getMessage());
+                    e.printStackTrace();
+                }
+            }
+            
+            // Close the HTML document
+            allChaptersHtml.append("</body></html>");
+            
+            // Save the complete HTML to a file
             try {
-                String timestamp = java.time.LocalDateTime.now().format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-                String filename = String.format("chapter_%s.html", timestamp);
-                
-                // Create a complete HTML document with the chapter content
-                String fullHtml = String.join("\n",
-                    "<!DOCTYPE html>",
-                    "<html><head>",
-                    "<meta charset=\"UTF-8\">",
-                    "<title>Chapter Content</title>",
-                    "<style>body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }</style>",
-                    "</head><body>",
-                    chapterHtml,
-                    "</body></html>"
-                );
+                String timestamp = java.time.LocalDateTime.now()
+                    .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+                String filename = String.format("genesis_chapters_1-3_%s.html", timestamp);
                 
                 java.nio.file.Files.writeString(
                     java.nio.file.Path.of(filename), 
-                    fullHtml);
-                System.out.println("\nFull chapter HTML saved to: " + filename);
+                    allChaptersHtml.toString());
                 
-                // Also save the raw chapter HTML
+                System.out.println("\nAll chapters saved to: " + filename);
+                
+                // Also save a raw version for reference
                 java.nio.file.Files.writeString(
-                    java.nio.file.Path.of("chapter_raw.html"), 
-                    chapterHtml);
-                System.out.println("Raw chapter HTML saved to: chapter_raw.html");
+                    java.nio.file.Path.of("genesis_chapters_1-3_raw.html"), 
+                    allChaptersHtml.toString());
                 
             } catch (Exception e) {
-                System.err.println("Failed to save chapter content: " + e.getMessage());
+                System.err.println("Failed to save complete book: " + e.getMessage());
             }
             
         } catch (Exception e) {
