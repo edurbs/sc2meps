@@ -238,13 +238,17 @@ public class Main {
             allChaptersHtml.append("<!DOCTYPE html>\n");
             allChaptersHtml.append("<html><head>\n");
             allChaptersHtml.append("<meta charset=\"UTF-8\">\n");
-            allChaptersHtml.append("<title>Genesis - First 3 Chapters</title>\n");
+            allChaptersHtml.append("<title>Genesis - Complete Book</title>\n");
             allChaptersHtml.append("<style>\n");
-            allChaptersHtml.append("body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; }\n");
+            allChaptersHtml.append("body { font-family: Arial, sans-serif; line-height: 1.6; margin: 20px; max-width: 900px; margin: 0 auto; padding: 20px; }\n");
+            allChaptersHtml.append("h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }\n");
             allChaptersHtml.append(".chapter { margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 20px; }\n");
+            allChaptersHtml.append(".chapter h2 { color: #2980b9; border-bottom: 1px solid #eee; padding-bottom: 5px; }\n");
             allChaptersHtml.append("</style>\n");
             allChaptersHtml.append("</head><body>\n");
-            allChaptersHtml.append("<h1>Genesis</h1>\n");
+            allChaptersHtml.append("<h1>The Book of Genesis</h1>\n");
+            allChaptersHtml.append("<div style='text-align: center; margin-bottom: 30px; color: #7f8c8d; font-style: italic;'>Extracted from scriptureearth.org - " + 
+                java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ofPattern("MMMM d, yyyy")) + "</div>\n");
             
             // Add the first chapter we already have
             allChaptersHtml.append("<div class='chapter' id='chapter-1'>\n");
@@ -252,10 +256,10 @@ public class Main {
             allChaptersHtml.append(chapterHtml);
             allChaptersHtml.append("\n</div>\n");
             
-            // Process remaining chapters (2-3)
-            for (int chapterNum = 2; chapterNum <= 3; chapterNum++) {
+            // Process remaining chapters (2-50)
+            for (int chapterNum = 2; chapterNum <= 50; chapterNum++) {
                 try {
-                    System.out.println("Processing Chapter " + chapterNum + "...");
+                    System.out.println("\n=== Processing Chapter " + chapterNum + " of 50 ===");
                     
                     // First, refresh the page to ensure clean state
                     System.out.println("Refreshing page...");
@@ -291,7 +295,10 @@ public class Main {
                             By.cssSelector("#content:not(:empty)")));
                     
                     // Wait a bit more for dynamic content to fully load
-                    Thread.sleep(2000);
+                    // Add progressive delay to avoid rate limiting (longer wait for later chapters)
+                    int delay = 2000 + (100 * (chapterNum / 10)); // Increase delay as we progress
+                    System.out.println("Waiting " + delay + "ms for content to stabilize...");
+                    Thread.sleep(delay);
                     
                     // Use JavaScript to get the complete content
                     System.out.println("Extracting chapter content...");
@@ -326,17 +333,17 @@ public class Main {
             try {
                 String timestamp = java.time.LocalDateTime.now()
                     .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-                String filename = String.format("genesis_chapters_1-3_%s.html", timestamp);
+                String filename = String.format("genesis_complete_%s.html", timestamp);
                 
                 java.nio.file.Files.writeString(
                     java.nio.file.Path.of(filename), 
                     allChaptersHtml.toString());
                 
-                System.out.println("\nAll chapters saved to: " + filename);
+                System.out.println("\nAll 50 chapters saved to: " + filename);
                 
                 // Also save a raw version for reference
                 java.nio.file.Files.writeString(
-                    java.nio.file.Path.of("genesis_chapters_1-3_raw.html"), 
+                    java.nio.file.Path.of("genesis_complete_raw.html"), 
                     allChaptersHtml.toString());
                 
             } catch (Exception e) {
