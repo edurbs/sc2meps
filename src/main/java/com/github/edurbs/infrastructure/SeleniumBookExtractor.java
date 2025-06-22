@@ -42,12 +42,9 @@ public class SeleniumBookExtractor implements ExtractBookUseCase {
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
-            if (driver != null) {
-                driver.quit();
-            }
+            driver.quit();
         }
     }
-    
 
     private WebDriverWait openPage(WebDriver driver) {
         String url = "https://scriptureearth.org/data/xav/sab/xav/#/text";
@@ -88,8 +85,7 @@ public class SeleniumBookExtractor implements ExtractBookUseCase {
                 .executeScript("return document.getElementById('content').innerHTML;");
         if (chapterContent == null || chapterContent.trim().isEmpty()) {
             System.out.println("Warning: Chapter content is empty! Trying alternative method...");
-            chapterContent = (String) ((JavascriptExecutor) driver)
-                    .executeScript("return document.body.innerHTML;");
+            chapterContent = (String) ((JavascriptExecutor) driver).executeScript("return document.body.innerHTML;");
         }
         return chapterContent;
     }
@@ -97,8 +93,7 @@ public class SeleniumBookExtractor implements ExtractBookUseCase {
     private void clickChapterLink(WebDriverWait wait, int chapterNum) {
         System.out.println("Clicking chapter selector: ");
         String chapterSelector = String.format("[id='%d']", chapterNum);
-        WebElement chapterLink = wait
-                .until(ExpectedConditions.elementToBeClickable(By.cssSelector(chapterSelector)));
+        WebElement chapterLink = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(chapterSelector)));
         chapterLink.click();
     }
 
@@ -144,21 +139,20 @@ public class SeleniumBookExtractor implements ExtractBookUseCase {
         allChaptersHtml.append("h1 { text-align: center; color: #2c3e50; margin-bottom: 30px; }\n");
         allChaptersHtml
                 .append(".chapter { margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 20px; }\n");
-        allChaptersHtml
-                .append(".chapter h2 { color: #2980b9; border-bottom: 1px solid #eee; padding-bottom: 5px; }\n");
+        allChaptersHtml.append(".chapter h2 { color: #2980b9; border-bottom: 1px solid #eee; padding-bottom: 5px; }\n");
         allChaptersHtml.append("</style>\n");
-        allChaptersHtml.append("""                    
-                <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/0.BD-KWcsM.css">
-                <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-app.css">
-                <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/BookSelector.mqkoy7lk.css">
-                <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/19.oxaumFWT.css">
-                <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-app.css">
-                <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-bc-C01.css">
-                <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/override-sab.css">
-                """);
+        allChaptersHtml
+                .append("""
+                        <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/0.BD-KWcsM.css">
+                        <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-app.css">
+                        <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/BookSelector.mqkoy7lk.css">
+                        <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/19.oxaumFWT.css">
+                        <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-app.css">
+                        <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-bc-C01.css">
+                        <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/override-sab.css">
+                        """);
         allChaptersHtml.append("</head><body>\n");
     }
-
 
     private WebDriver getWebDriver() {
         System.setProperty("webdriver.chrome.driver", chromeDriverPath);
