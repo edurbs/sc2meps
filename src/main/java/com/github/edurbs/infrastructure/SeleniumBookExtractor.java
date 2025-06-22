@@ -11,28 +11,38 @@ import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
-import com.github.edurbs.application.ExtractBookUseCase;
+import com.github.edurbs.adapter.Extractor;
 
-public class SeleniumBookExtractor implements ExtractBookUseCase {
+public class SeleniumBookExtractor implements Extractor {
     private final String chromePath;
     private final String chromeDriverPath;
-    private final String bookCodeName;
-    private final Integer chapters;
+    private final String url;
+    private String bookCodeName;
+    private Integer chapters;
+    private StringBuilder allChaptersHtml = new StringBuilder();
 
-    public SeleniumBookExtractor(String chromePath, String chromeDriverPath, String bookCodeName, Integer chapters) {
+    public SeleniumBookExtractor(String chromePath, String chromeDriverPath, String url) {
         this.chromePath = chromePath;
         this.chromeDriverPath = chromeDriverPath;
+        this.url = url;
+    }
+
+    public void setBookCodeName(String bookCodeName) {
         this.bookCodeName = bookCodeName;
+    }
+
+    public void setChapters(Integer chapters) {
         this.chapters = chapters;
     }
 
     @Override
     public void extractBook() {
-        System.out.println("Starting SeleniumGenesisExtractor...");
+        doChecks();
+        System.out.println("Starting SeleniumExtractor...");
         WebDriver driver = getWebDriver();
+        allChaptersHtml.setLength(0); 
         try {
             WebDriverWait wait = openPage(driver);
-            StringBuilder allChaptersHtml = new StringBuilder();
             addHeader(allChaptersHtml);
             for (int chapterNum = 1; chapterNum <= this.chapters; chapterNum++) {
                 getChapter(driver, wait, allChaptersHtml, chapterNum);
@@ -46,8 +56,20 @@ public class SeleniumBookExtractor implements ExtractBookUseCase {
         }
     }
 
+    private void doChecks() {
+        if (this.bookCodeName == null || this.chapters == null) {
+            throw new IllegalArgumentException("Book code name and chapters must be set before extraction.");
+        }
+        if (this.chapters <= 0) {
+            throw new IllegalArgumentException("Chapters must be greater than 0.");
+        }
+        if (this.bookCodeName.isEmpty()) {
+            throw new IllegalArgumentException("Book code name cannot be empty.");
+        }
+    }
+
     private WebDriverWait openPage(WebDriver driver) {
-        String url = "https://scriptureearth.org/data/xav/sab/xav/#/text";
+        //String url = "https://scriptureearth.org/data/xav/sab/xav/#/text";
         System.out.println("Navigating to: " + url);
         driver.get(url);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
@@ -99,7 +121,7 @@ public class SeleniumBookExtractor implements ExtractBookUseCase {
 
     private void clickBook(WebDriverWait wait) throws InterruptedException {
         System.out.println("Clicking book...");
-        WebElement genBook = wait.until(ExpectedConditions.elementToBeClickable(By.id(this.bookCodeName.substring(1))));
+        WebElement genBook = wait.until(ExpectedConditions.elementToBeClickable(By.id(this.bookCodeName)));
         genBook.click();
         Thread.sleep(1000);
     }
@@ -113,15 +135,15 @@ public class SeleniumBookExtractor implements ExtractBookUseCase {
 
     private void saveToFile(StringBuilder allChaptersHtml) {
         try {
-            String timestamp = java.time.LocalDateTime.now()
-                    .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-            String filename = String.format("genesis_complete_%s.html", timestamp);
-            java.nio.file.Files.writeString(java.nio.file.Path.of(filename), allChaptersHtml.toString());
-            System.out.println("\nAll 50 chapters saved to: " + filename);
-            java.nio.file.Files.writeString(java.nio.file.Path.of("genesis_complete_raw.html"),
+            //String timestamp = java.time.LocalDateTime.now()
+            //        .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+            //String filename = String.format("%s complete_%s.html", this.bookCodeName , timestamp);
+           // java.nio.file.Files.writeString(java.nio.file.Path.of(filename), allChaptersHtml.toString());
+            //System.out.println("\nAll 50 chapters saved to: " + filename);
+            java.nio.file.Files.writeString(java.nio.file.Path.of("%s_complete_raw.html".formatted(this.bookCodeName)),
                     allChaptersHtml.toString());
         } catch (Exception e) {
-            System.err.println("Failed to save complete book: " + e.getMessage());
+            System.err.println("Failed to save complete book: %s %s ".formatted(this.bookCodeName,e.getMessage()));
         }
     }
 
@@ -163,5 +185,15 @@ public class SeleniumBookExtractor implements ExtractBookUseCase {
         options.addArguments("--no-sandbox");
         options.addArguments("--disable-dev-shm-usage");
         return new ChromeDriver(options);
+    }
+
+    @Override
+    public String getBookCodeName() {
+        return "%s_complete_raw.html".formatted(this.bookCodeName);
+    }
+
+    @Override
+    public String getBookContent() {
+        return this.allChaptersHtml.toString();
     }
 }

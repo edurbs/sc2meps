@@ -74,18 +74,18 @@ public enum ScriptureEarthBookName {
     BOOK_JUD(MepsBookName.BOOK_65_JUD),
     BOOK_REV(MepsBookName.BOOK_66_REV);
 
-    private final MepsBookName bookName;
+    private final MepsBookName mepsBookName;
 
     public String getName() {
         return this.toString().substring(5);
     }
 
-    public static ScriptureEarthBookName fromString(String bookName) {
+    public static ScriptureEarthBookName fromString(String mepsBookName) {
         for (ScriptureEarthBookName youVersionBookName : ScriptureEarthBookName.values()) {
-            if (youVersionBookName.bookName.equals(MepsBookName.valueOf(bookName))) {
+            if (youVersionBookName.mepsBookName.equals(MepsBookName.valueOf(mepsBookName))) {
                 return youVersionBookName;
             }
         }
-        throw new IllegalArgumentException("No enum constant found for string: " + bookName);
+        throw new IllegalArgumentException("No enum constant found for string: " + mepsBookName);
     }
 }
