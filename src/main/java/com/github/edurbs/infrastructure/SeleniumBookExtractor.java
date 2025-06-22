@@ -63,8 +63,6 @@ public class SeleniumBookExtractor implements ExtractBookUseCase {
     private void getChapter(WebDriver driver, WebDriverWait wait, StringBuilder allChaptersHtml, int chapterNum) {
         try {
             System.out.println("\n=== Processing Chapter %s of %s ===".formatted(chapterNum, this.chapters));
-            //System.out.println("Refreshing page...");
-            //driver.navigate().refresh();
             clickMenuToggle(wait);
             clickBook(wait);
             clickChapterLink(wait, chapterNum);
