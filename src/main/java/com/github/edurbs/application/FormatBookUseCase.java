@@ -11,7 +11,7 @@ public class FormatBookUseCase {
         this.bookCodeName = bookCodeName;
         this.chapters = chapters;
     }
-    public void execute(){
+    public String execute(){
         String bookContent = "";
         java.nio.file.Path bookFilePath = java.nio.file.Paths.get("%s_complete_raw.html".formatted(bookCodeName));
         if (java.nio.file.Files.exists(bookFilePath)) {
@@ -29,6 +29,6 @@ public class FormatBookUseCase {
         if (bookContent.isEmpty()) {
             System.err.println("Book content is empty. Please check the extraction process. %s".formatted(bookCodeName));
         }
-        System.out.println(bookContent.substring(0, Math.min(100, bookContent.length())) + "...");
+        return bookContent;
     }
 }
