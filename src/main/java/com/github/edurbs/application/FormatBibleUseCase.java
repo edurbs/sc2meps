@@ -8,9 +8,11 @@ import com.github.edurbs.domain.ScriptureEarthBookName;
 public class FormatBibleUseCase {
 
     private final Extractor extractor;
+    private final HtmlHandler htmlHandler;
 
-    public FormatBibleUseCase(Extractor extractor) {
+    public FormatBibleUseCase(Extractor extractor, HtmlHandler htmlHandler) {
         this.extractor = extractor;
+        this.htmlHandler = htmlHandler;
     }
 
     public void execute() {
@@ -19,7 +21,7 @@ public class FormatBibleUseCase {
             MepsBookName mepsBookName = scriptureEarthBook.getMepsName();
             // ScriptureEarthBookName.fromString(scriptureEarthBookName).getMepsBookName();
             Integer chapters = mepsBookName.getNumberOfChapters();
-            FormatBookUseCase formatBookUseCase = new FormatBookUseCase(extractor, scriptureEarthBookName, chapters );
+            FormatBookUseCase formatBookUseCase = new FormatBookUseCase(extractor, scriptureEarthBookName, chapters, htmlHandler);
             Book book = new Book(mepsBookName, formatBookUseCase.execute());
             showStatus(book);
         }

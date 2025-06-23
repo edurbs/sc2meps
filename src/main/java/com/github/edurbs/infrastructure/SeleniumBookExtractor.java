@@ -12,6 +12,7 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.github.edurbs.adapter.Extractor;
+import com.github.edurbs.application.HtmlHandler;
 
 public class SeleniumBookExtractor implements Extractor {
     private final String chromePath;
@@ -20,11 +21,13 @@ public class SeleniumBookExtractor implements Extractor {
     private String bookCodeName;
     private Integer chapters;
     private StringBuilder allChaptersHtml = new StringBuilder();
+    private final HtmlHandler htmlHandler;
 
-    public SeleniumBookExtractor(String chromePath, String chromeDriverPath, String url) {
+    public SeleniumBookExtractor(String chromePath, String chromeDriverPath, String url, HtmlHandler htmlHandler) {
         this.chromePath = chromePath;
         this.chromeDriverPath = chromeDriverPath;
         this.url = url;
+        this.htmlHandler = htmlHandler;
     }
 
     public void setBookCodeName(String bookCodeName) {
@@ -134,17 +137,9 @@ public class SeleniumBookExtractor implements Extractor {
     }
 
     private void saveToFile(StringBuilder allChaptersHtml) {
-        try {
-            //String timestamp = java.time.LocalDateTime.now()
-            //        .format(java.time.format.DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-            //String filename = String.format("%s complete_%s.html", this.bookCodeName , timestamp);
-           // java.nio.file.Files.writeString(java.nio.file.Path.of(filename), allChaptersHtml.toString());
-            //System.out.println("\nAll 50 chapters saved to: " + filename);
-            java.nio.file.Files.writeString(java.nio.file.Path.of("%s_complete_raw.html".formatted(this.bookCodeName)),
-                    allChaptersHtml.toString());
-        } catch (Exception e) {
-            System.err.println("Failed to save complete book: %s %s ".formatted(this.bookCodeName,e.getMessage()));
-        }
+        System.out.println("Saving complete book to file...");
+        this.htmlHandler.saveToFile(allChaptersHtml, this.bookCodeName);
+        System.out.println("Book saved successfully.");
     }
 
     private void addFooter(StringBuilder allChaptersHtml) {
