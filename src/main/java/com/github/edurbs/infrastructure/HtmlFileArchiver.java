@@ -16,19 +16,19 @@ public class HtmlFileArchiver implements HtmlArchiver {
     }
 
     @Override
-    public void saveHtmlToFile(StringBuilder content, String bookCodeName) {
+    public void saveHtmlToFile(String content, String bookCodeName) {
         saveToFile(content, getHtmlFileName(bookCodeName));
     }
 
     @Override
-    public void saveFormattedHtmlToFile(StringBuilder content, String bookCodeName) {
+    public void saveFormattedHtmlToFile(String content, String bookCodeName) {
         saveToFile(content, getFormattedHtmlFileName(bookCodeName));
     }
 
-    private void saveToFile(StringBuilder content, String fileName){
+    private void saveToFile(String content, String fileName){
         java.nio.file.Path path = java.nio.file.Paths.get(fileName);
         try {
-            java.nio.file.Files.writeString(path, content.toString());
+            java.nio.file.Files.writeString(path, content);
             logger.info("Formatted file saved successfully to: {}", path.toAbsolutePath());
         } catch (java.io.IOException e) {
             logger.error("Error saving formatted file: {}", e.getMessage());
