@@ -14,7 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.edurbs.adapter.Extractor;
-import com.github.edurbs.adapter.HtmlHandler;
+import com.github.edurbs.adapter.HtmlArchiver;
 
 public class SeleniumBookExtractor implements Extractor {
     private static final Logger logger = LoggerFactory.getLogger(SeleniumBookExtractor.class);
@@ -24,9 +24,9 @@ public class SeleniumBookExtractor implements Extractor {
     private String bookCodeName;
     private Integer chapters;
     private StringBuilder allChaptersHtml = new StringBuilder();
-    private final HtmlHandler htmlHandler;
+    private final HtmlArchiver htmlHandler;
 
-    public SeleniumBookExtractor(String chromePath, String chromeDriverPath, HtmlHandler htmlHandler, String url) {
+    public SeleniumBookExtractor(String chromePath, String chromeDriverPath, HtmlArchiver htmlHandler, String url) {
         this.chromePath = chromePath;
         this.chromeDriverPath = chromeDriverPath;
         this.htmlHandler = htmlHandler;

@@ -5,15 +5,15 @@ import org.slf4j.LoggerFactory;
 
 import com.github.edurbs.adapter.Extractor;
 import com.github.edurbs.adapter.FormatBook;
-import com.github.edurbs.adapter.HtmlHandler;
+import com.github.edurbs.adapter.HtmlArchiver;
 import com.github.edurbs.domain.ScriptureEarthBookName;
 
 public class FormatBookUseCase implements FormatBook {
     private static final Logger logger = LoggerFactory.getLogger(FormatBookUseCase.class);
-    private final HtmlHandler htmlHandler;
+    private final HtmlArchiver htmlHandler;
     private final Extractor extractor;
 
-    public FormatBookUseCase(Extractor extractor, HtmlHandler htmlHandler) {
+    public FormatBookUseCase(Extractor extractor, HtmlArchiver htmlHandler) {
         this.extractor = extractor;
         this.htmlHandler = htmlHandler;
     }
@@ -28,10 +28,22 @@ public class FormatBookUseCase implements FormatBook {
         if (bookContent.isEmpty()) {
             logger.error("Book content is empty. Please check the extraction process. {}", bookCodeName);
         }
-        return bookContent;
+        return format(bookContent);
     }
 
     private String getHtmlFromFile(String bookCodeName) {
         return htmlHandler.getHtmlFileContent(bookCodeName);
     }
+    private String format(String bookContent) {
+        // Implement the formatting logic here
+        // For now, just return the content as is
+        return bookContent;
+    }
+
+    private String cleanText(String text) {
+        // Remove unwanted text such as introductions, comments, footers, and page numbers.
+        return text;
+    }
+
+
 }
