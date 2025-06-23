@@ -26,7 +26,7 @@ public class FormatBibleUseCase {
             String scriptureEarthBookName = scriptureEarthBook.getName();
             MepsBookName mepsBookName = scriptureEarthBook.getMepsName();
             Integer chapters = mepsBookName.getNumberOfChapters();
-            FormatBookUseCase formatBookUseCase = new FormatBookUseCase(extractor, scriptureEarthBookName, chapters, htmlHandler);
+            ExtractBookUseCase formatBookUseCase = new ExtractBookUseCase(extractor, scriptureEarthBookName, chapters, htmlHandler);
             Book book = new Book(mepsBookName, formatBookUseCase.execute());
             showStatus(book);
         }
