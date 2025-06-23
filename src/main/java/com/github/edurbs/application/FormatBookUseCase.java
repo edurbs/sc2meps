@@ -1,8 +1,12 @@
 package com.github.edurbs.application;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.edurbs.adapter.Extractor;
 
 public class FormatBookUseCase {
+    private static final Logger logger = LoggerFactory.getLogger(FormatBookUseCase.class);
     private final Extractor extractor;
     private String bookCodeName;
     private Integer chapters;
@@ -22,7 +26,7 @@ public class FormatBookUseCase {
             bookContent = extractor.getBookContent();
         }
         if (bookContent.isEmpty()) {
-            System.err.println("Book content is empty. Please check the extraction process. %s".formatted(bookCodeName));
+            logger.error("Book content is empty. Please check the extraction process. {}", bookCodeName);
         }
         return bookContent;
     }

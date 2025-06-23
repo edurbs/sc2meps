@@ -10,11 +10,14 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.chrome.ChromeOptions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.edurbs.adapter.Extractor;
 import com.github.edurbs.application.HtmlHandler;
 
 public class SeleniumBookExtractor implements Extractor {
+    private static final Logger logger = LoggerFactory.getLogger(SeleniumBookExtractor.class);
     private final String chromePath;
     private final String chromeDriverPath;
     private final String url;
@@ -41,7 +44,7 @@ public class SeleniumBookExtractor implements Extractor {
     @Override
     public void extractBook() {
         doChecks();
-        System.out.println("Starting SeleniumExtractor...");
+        logger.info("Starting SeleniumExtractor...");
         WebDriver driver = getWebDriver();
         allChaptersHtml.setLength(0); 
         try {
@@ -73,10 +76,10 @@ public class SeleniumBookExtractor implements Extractor {
 
     private WebDriverWait openPage(WebDriver driver) {
         //String url = "https://scriptureearth.org/data/xav/sab/xav/#/text";
-        System.out.println("Navigating to: " + url);
+        logger.info("Navigating to: {}", url);
         driver.get(url);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
-        System.out.println("Waiting for page to load...");
+        logger.info("Waiting for page to load...");
         wait.until(webDriver -> ((JavascriptExecutor) driver).executeScript("return document.readyState")
                 .equals("complete"));
         return wait;
@@ -84,7 +87,7 @@ public class SeleniumBookExtractor implements Extractor {
 
     private void getChapter(WebDriver driver, WebDriverWait wait, StringBuilder allChaptersHtml, int chapterNum) {
         try {
-            System.out.println("\n=== Processing Chapter %s of %s ===".formatted(chapterNum, this.chapters));
+            logger.info("\n=== Processing Chapter {} of {} ===", chapterNum, this.chapters);
             clickMenuToggle(wait);
             clickBook(wait);
             clickChapterLink(wait, chapterNum);
@@ -92,54 +95,54 @@ public class SeleniumBookExtractor implements Extractor {
             allChaptersHtml.append(String.format("<div class='chapter' id='chapter-%d'>\n", chapterNum));
             allChaptersHtml.append(chapterContent);
             allChaptersHtml.append("\n</div>\n");
-            System.out.println("Added Chapter " + chapterNum);
+            logger.info("Added Chapter {}", chapterNum);
         } catch (Exception e) {
-            System.err.println("Error processing Chapter " + chapterNum + ": " + e.getMessage());
+            logger.error("Error processing Chapter {}: {}", chapterNum, e.getMessage());
             e.printStackTrace();
         }
     }
 
     private String getChapterContent(WebDriver driver, WebDriverWait wait, int chapterNum) throws InterruptedException {
-        System.out.println("Waiting for content to load...");
+        logger.info("Waiting for content to load...");
         wait.until(ExpectedConditions.visibilityOfElementLocated(By.cssSelector("#content:not(:empty)")));
         int delay = 2000 + (100 * (chapterNum / 10));
-        System.out.println("Waiting " + delay + "ms for content to stabilize...");
+        logger.info("Waiting {}ms for content to stabilize...", delay);
         Thread.sleep(delay);
-        System.out.println("Extracting chapter content...");
+        logger.info("Extracting chapter content...");
         String chapterContent = (String) ((JavascriptExecutor) driver)
                 .executeScript("return document.getElementById('content').innerHTML;");
         if (chapterContent == null || chapterContent.trim().isEmpty()) {
-            System.out.println("Warning: Chapter content is empty! Trying alternative method...");
+            logger.info("Warning: Chapter content is empty! Trying alternative method...");
             chapterContent = (String) ((JavascriptExecutor) driver).executeScript("return document.body.innerHTML;");
         }
         return chapterContent;
     }
 
     private void clickChapterLink(WebDriverWait wait, int chapterNum) {
-        System.out.println("Clicking chapter selector: ");
+        logger.info("Clicking chapter selector: ");
         String chapterSelector = String.format("[id='%d']", chapterNum);
         WebElement chapterLink = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(chapterSelector)));
         chapterLink.click();
     }
 
     private void clickBook(WebDriverWait wait) throws InterruptedException {
-        System.out.println("Clicking book %s...".formatted(this.bookCodeName));
+        logger.info("Clicking book {}...", this.bookCodeName);
         WebElement genBook = wait.until(ExpectedConditions.elementToBeClickable(By.id(this.bookCodeName)));
         genBook.click();
         Thread.sleep(1000);
     }
 
     private void clickMenuToggle(WebDriverWait wait) {
-        System.out.println("Clicking menu...");
+        logger.info("Clicking menu...");
         WebElement menuToggle = wait
                 .until(ExpectedConditions.elementToBeClickable(By.cssSelector(".whitespace-nowrap")));
         menuToggle.click();
     }
 
     private void saveToFile(StringBuilder allChaptersHtml) {
-        System.out.println("Saving complete book to file...");
+        logger.info("Saving complete book to file...");
         this.htmlHandler.saveToFile(allChaptersHtml, this.bookCodeName);
-        System.out.println("Book saved successfully.");
+        logger.info("Book saved successfully.");
     }
 
     private void addFooter(StringBuilder allChaptersHtml) {

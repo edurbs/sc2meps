@@ -1,8 +1,12 @@
 package com.github.edurbs.infrastructure;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.edurbs.application.HtmlHandler;
 
 public class HtmlFileHandler implements HtmlHandler { 
+    private static final Logger logger = LoggerFactory.getLogger(HtmlFileHandler.class);
     private final String filePath;
     private static final String SUFFIX = "_complete_raw.html";
 
@@ -15,9 +19,9 @@ public class HtmlFileHandler implements HtmlHandler {
         java.nio.file.Path path = java.nio.file.Paths.get(getFilePath(bookCodeName));
         try {
             java.nio.file.Files.writeString(path, content.toString());
-            System.out.println("File saved successfully to: " + path.toAbsolutePath());
+            logger.info("File saved successfully to: {}", path.toAbsolutePath());
         } catch (java.io.IOException e) {
-            System.err.println("Error saving file: " + e.getMessage());
+            logger.error("Error saving file: {}", e.getMessage());
         }
     }
 
@@ -28,10 +32,10 @@ public class HtmlFileHandler implements HtmlHandler {
             try {
                 return java.nio.file.Files.readString(path);
             } catch (java.io.IOException e) {
-                System.err.println("Error reading the file: " + e.getMessage());
+                logger.error("Error reading the file: {}", e.getMessage());
             }
         } else {
-            System.err.println("File does not exist: " + path.toAbsolutePath());
+            logger.error("File does not exist: {}", path.toAbsolutePath());
         }
         return "";
     }

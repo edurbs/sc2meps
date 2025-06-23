@@ -15,6 +15,7 @@
         <selenium.version>4.18.1</selenium.version>
         <webdrivermanager.version>5.7.0</webdrivermanager.version>
         <lombok.version>1.18.28</lombok.version>
+        <logback.version>1.5.18</logback.version>
     </properties>
 
     <dependencies>
@@ -25,12 +26,13 @@
             <version>${selenium.version}</version>
         </dependency>
         
-        <!-- WebDriverManager -->
-        <!-- <dependency>
-            <groupId>io.github.bonigarcia</groupId>
-            <artifactId>webdrivermanager</artifactId>
-            <version>${webdrivermanager.version}</version>
-        </dependency> -->
+        <!-- https://mvnrepository.com/artifact/ch.qos.logback/logback-classic -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+            <scope>compile</scope>
+        </dependency>
 
         <!-- Lombok -->
         <dependency>
