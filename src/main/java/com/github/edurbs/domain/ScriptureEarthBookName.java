@@ -9,43 +9,43 @@ public enum ScriptureEarthBookName {
 
     BOOK_GEN(MepsBookName.BOOK_01_GEN),
     BOOK_EXO(MepsBookName.BOOK_02_EXO),
-    BOOK_LEV(MepsBookName.BOOK_03_LEV),
-    BOOK_NUM(MepsBookName.BOOK_04_NUM),
-    BOOK_DEU(MepsBookName.BOOK_05_DEU),
+    // BOOK_LEV(MepsBookName.BOOK_03_LEV),
+    // BOOK_NUM(MepsBookName.BOOK_04_NUM),
+    // BOOK_DEU(MepsBookName.BOOK_05_DEU),
     BOOK_JOS(MepsBookName.BOOK_06_JOS),
     BOOK_JDG(MepsBookName.BOOK_07_JUD),
     BOOK_RUT(MepsBookName.BOOK_08_RUT),
     BOOK_1SA(MepsBookName.BOOK_09_1SA),
     BOOK_2SA(MepsBookName.BOOK_10_2SA),
-    BOOK_1KI(MepsBookName.BOOK_11_1KI),
-    BOOK_2KI(MepsBookName.BOOK_12_2KI),
-    BOOK_1CH(MepsBookName.BOOK_13_1CH),
-    BOOK_2CH(MepsBookName.BOOK_14_2CH),
+    // BOOK_1KI(MepsBookName.BOOK_11_1KI),
+    // BOOK_2KI(MepsBookName.BOOK_12_2KI),
+    // BOOK_1CH(MepsBookName.BOOK_13_1CH),
+    // BOOK_2CH(MepsBookName.BOOK_14_2CH),
     BOOK_EZR(MepsBookName.BOOK_15_EZR),
     BOOK_NEH(MepsBookName.BOOK_16_NEH),
     BOOK_EST(MepsBookName.BOOK_17_EST),
-    BOOK_JOB(MepsBookName.BOOK_18_JOB),
+    // BOOK_JOB(MepsBookName.BOOK_18_JOB),
     BOOK_PSA(MepsBookName.BOOK_19_PSA),
     BOOK_PRO(MepsBookName.BOOK_20_PRO),
-    BOOK_ECC(MepsBookName.BOOK_21_ECC),
-    BOOK_SNG(MepsBookName.BOOK_22_SON),
-    BOOK_ISA(MepsBookName.BOOK_23_ISA),
-    BOOK_JER(MepsBookName.BOOK_24_JER),
-    BOOK_LAM(MepsBookName.BOOK_25_LAM),
-    BOOK_EZK(MepsBookName.BOOK_26_EZE),
+    // BOOK_ECC(MepsBookName.BOOK_21_ECC),
+    // BOOK_SNG(MepsBookName.BOOK_22_SON),
+    // BOOK_ISA(MepsBookName.BOOK_23_ISA),
+    // BOOK_JER(MepsBookName.BOOK_24_JER),
+    // BOOK_LAM(MepsBookName.BOOK_25_LAM),
+    // BOOK_EZK(MepsBookName.BOOK_26_EZE),
     BOOK_DAN(MepsBookName.BOOK_27_DAN),
-    BOOK_HOS(MepsBookName.BOOK_28_HOS),
+    // BOOK_HOS(MepsBookName.BOOK_28_HOS),
     BOOK_JOL(MepsBookName.BOOK_29_JOE),
     BOOK_AMO(MepsBookName.BOOK_30_AMO),
-    BOOK_OBA(MepsBookName.BOOK_31_OBA),
+    // BOOK_OBA(MepsBookName.BOOK_31_OBA),
     BOOK_JON(MepsBookName.BOOK_32_JON),
-    BOOK_MIC(MepsBookName.BOOK_33_MIC),
-    BOOK_NAM(MepsBookName.BOOK_34_NAH),
-    BOOK_HAB(MepsBookName.BOOK_35_HAB),
-    BOOK_ZEP(MepsBookName.BOOK_36_ZEP),
-    BOOK_HAG(MepsBookName.BOOK_37_HAG),
-    BOOK_ZEC(MepsBookName.BOOK_38_ZEC),
-    BOOK_MAL(MepsBookName.BOOK_39_MAL),
+    // BOOK_MIC(MepsBookName.BOOK_33_MIC),
+    // BOOK_NAM(MepsBookName.BOOK_34_NAH),
+    // BOOK_HAB(MepsBookName.BOOK_35_HAB),
+    // BOOK_ZEP(MepsBookName.BOOK_36_ZEP),
+    // BOOK_HAG(MepsBookName.BOOK_37_HAG),
+    // BOOK_ZEC(MepsBookName.BOOK_38_ZEC),
+    // BOOK_MAL(MepsBookName.BOOK_39_MAL),
     BOOK_MAT(MepsBookName.BOOK_40_MAT),
     BOOK_MRK(MepsBookName.BOOK_41_MAR),
     BOOK_LUK(MepsBookName.BOOK_42_LUK),
@@ -80,12 +80,8 @@ public enum ScriptureEarthBookName {
         return this.toString().substring(5);
     }
 
-    public static ScriptureEarthBookName fromString(String mepsBookName) {
-        for (ScriptureEarthBookName youVersionBookName : ScriptureEarthBookName.values()) {
-            if (youVersionBookName.mepsBookName.equals(MepsBookName.valueOf(mepsBookName))) {
-                return youVersionBookName;
-            }
-        }
-        throw new IllegalArgumentException("No enum constant found for string: " + mepsBookName);
+    public MepsBookName getMepsName() {
+        return this.mepsBookName;
     }
+
 }

@@ -14,18 +14,20 @@ public class FormatBibleUseCase {
     }
 
     public void execute() {
-        ScriptureEarthBookName scriptureEarthBook = ScriptureEarthBookName.BOOK_GEN;
-        String scriptureEarthBookName = scriptureEarthBook.getName();
-        MepsBookName mepsBookName = ScriptureEarthBookName.BOOK_GEN.getMepsBookName();
-        Integer chapters = mepsBookName.getNumberOfChapters();
-        FormatBookUseCase formatBookUseCase = new FormatBookUseCase(extractor, scriptureEarthBookName, chapters );
-        Book genesis = new Book(mepsBookName, formatBookUseCase.execute());
-        showStatus(genesis);
+        for (ScriptureEarthBookName scriptureEarthBook : ScriptureEarthBookName.values()) {
+            String scriptureEarthBookName = scriptureEarthBook.getName();
+            MepsBookName mepsBookName = scriptureEarthBook.getMepsName();
+            // ScriptureEarthBookName.fromString(scriptureEarthBookName).getMepsBookName();
+            Integer chapters = mepsBookName.getNumberOfChapters();
+            FormatBookUseCase formatBookUseCase = new FormatBookUseCase(extractor, scriptureEarthBookName, chapters );
+            Book book = new Book(mepsBookName, formatBookUseCase.execute());
+            showStatus(book);
+        }
     }
 
-    private void showStatus(Book genesis) {
-        System.out.println("Formatted book: " + genesis.mepsBookName().name());
-        System.out.println("Book content: " + genesis.html().substring(0, Math.min(genesis.html().length(), 100)) + "...");
+    private void showStatus(Book book) {
+        System.out.println("Formatted book: " + book.mepsBookName().name());
+        System.out.println("Book content: " + book.html().substring(0, Math.min(book.html().length(), 100)) + "...");
     }
 
 }

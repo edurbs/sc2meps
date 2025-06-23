@@ -120,7 +120,7 @@ public class SeleniumBookExtractor implements Extractor {
     }
 
     private void clickBook(WebDriverWait wait) throws InterruptedException {
-        System.out.println("Clicking book...");
+        System.out.println("Clicking book %s...".formatted(this.bookCodeName));
         WebElement genBook = wait.until(ExpectedConditions.elementToBeClickable(By.id(this.bookCodeName)));
         genBook.click();
         Thread.sleep(1000);
