@@ -1,10 +1,5 @@
 package com.github.edurbs.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@Getter
-@AllArgsConstructor
 public enum MepsBookName {
 
     BOOK_01_GEN(new Integer[] {31, 25, 24, 26, 32, 22, 24, 22, 29, 32, 32, 20, 18, 24, 21, 16, 27, 33, 38, 18, 34, 24, 20, 67, 34, 35, 46, 22, 35, 43, 55, 32, 20, 31, 29, 43, 36, 30, 23, 23, 57, 38, 34, 34, 28, 34, 31, 22, 33, 26}),
@@ -75,6 +70,10 @@ public enum MepsBookName {
     BOOK_66_REV(new Integer[] {20,29,22,11,14,17,17,13,21,11,19,17,18,20,8,21,18,24,21,15,27,21});
 
     private final Integer[] scriptures;
+
+    MepsBookName(Integer[] integers) {
+        this.scriptures = integers;
+    }
 
     public String getMepsFormat() {
         return this.toString().substring(5);

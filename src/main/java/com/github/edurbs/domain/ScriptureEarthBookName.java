@@ -1,10 +1,5 @@
 package com.github.edurbs.domain;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-
-@AllArgsConstructor
-@Getter
 public enum ScriptureEarthBookName {
 
     BOOK_GEN(MepsBookName.BOOK_01_GEN),
@@ -76,7 +71,11 @@ public enum ScriptureEarthBookName {
 
     private final MepsBookName mepsBookName;
 
-    public String getName() {
+    ScriptureEarthBookName(MepsBookName book) {
+		this.mepsBookName = book;
+	}
+
+	public String getName() {
         return this.toString().substring(5);
     }
 
