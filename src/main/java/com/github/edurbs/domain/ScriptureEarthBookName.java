@@ -83,4 +83,8 @@ public enum ScriptureEarthBookName {
         return this.mepsBookName;
     }
 
+    public Integer getChapters(){
+        return this.getMepsName().getNumberOfChapters();
+    }
+
 }

@@ -4,27 +4,26 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.edurbs.adapter.Extractor;
+import com.github.edurbs.adapter.FormatBook;
 import com.github.edurbs.adapter.HtmlHandler;
+import com.github.edurbs.domain.ScriptureEarthBookName;
 
-public class ExtractBookUseCase {
-    private static final Logger logger = LoggerFactory.getLogger(ExtractBookUseCase.class);
+public class FormatBookUseCase implements FormatBook {
+    private static final Logger logger = LoggerFactory.getLogger(FormatBookUseCase.class);
+    private final HtmlHandler htmlHandler;
     private final Extractor extractor;
-    private String bookCodeName;
-    private Integer chapters;
-    private HtmlHandler htmlHandler;
-    public ExtractBookUseCase(Extractor extractor, String bookCodeName, Integer chapters, HtmlHandler htmlHandler) {
+
+    public FormatBookUseCase(Extractor extractor, HtmlHandler htmlHandler) {
         this.extractor = extractor;
-        this.bookCodeName = bookCodeName;
-        this.chapters = chapters;
         this.htmlHandler = htmlHandler;
     }
-    public String execute(){
+ 
+    public String execute(ScriptureEarthBookName scriptureEarthBookName) {
+        String bookCodeName = scriptureEarthBookName.getName();
+        Integer chapters = scriptureEarthBookName.getChapters();
         String bookContent = getHtmlFromFile(bookCodeName);
         if (bookContent.isEmpty()) {
-            extractor.setBookCodeName(bookCodeName);
-            extractor.setChapters(chapters);
-            extractor.extractBook();
-            bookContent = extractor.getBookContent();
+            bookContent = extractor.extractBook(bookCodeName, chapters);
         }
         if (bookContent.isEmpty()) {
             logger.error("Book content is empty. Please check the extraction process. {}", bookCodeName);

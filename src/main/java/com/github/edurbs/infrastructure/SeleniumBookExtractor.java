@@ -26,31 +26,24 @@ public class SeleniumBookExtractor implements Extractor {
     private StringBuilder allChaptersHtml = new StringBuilder();
     private final HtmlHandler htmlHandler;
 
-    public SeleniumBookExtractor(String chromePath, String chromeDriverPath, String url, HtmlHandler htmlHandler) {
+    public SeleniumBookExtractor(String chromePath, String chromeDriverPath, HtmlHandler htmlHandler, String url) {
         this.chromePath = chromePath;
         this.chromeDriverPath = chromeDriverPath;
-        this.url = url;
         this.htmlHandler = htmlHandler;
-    }
-
-    public void setBookCodeName(String bookCodeName) {
-        this.bookCodeName = bookCodeName;
-    }
-
-    public void setChapters(Integer chapters) {
-        this.chapters = chapters;
+        this.url = url;
     }
 
     @Override
-    public void extractBook() {
-        doChecks();
+    public String extractBook(String bookCodeName, Integer chapters) {
+        this.bookCodeName = bookCodeName;
+        this.chapters = chapters;
         logger.info("Starting SeleniumExtractor...");
         WebDriver driver = getWebDriver();
         allChaptersHtml.setLength(0); 
         try {
-            WebDriverWait wait = openPage(driver);
+            WebDriverWait wait = openPage(url, driver);
             addHeader(allChaptersHtml);
-            for (int chapterNum = 1; chapterNum <= this.chapters; chapterNum++) {
+            for (int chapterNum = 1; chapterNum <= chapters; chapterNum++) {
                 getChapter(driver, wait, allChaptersHtml, chapterNum);
             }
             addFooter(allChaptersHtml);
@@ -60,22 +53,10 @@ public class SeleniumBookExtractor implements Extractor {
         } finally {
             driver.quit();
         }
+        return allChaptersHtml.toString();
     }
 
-    private void doChecks() {
-        if (this.bookCodeName == null || this.chapters == null) {
-            throw new IllegalArgumentException("Book code name and chapters must be set before extraction.");
-        }
-        if (this.chapters <= 0) {
-            throw new IllegalArgumentException("Chapters must be greater than 0.");
-        }
-        if (this.bookCodeName.isEmpty()) {
-            throw new IllegalArgumentException("Book code name cannot be empty.");
-        }
-    }
-
-    private WebDriverWait openPage(WebDriver driver) {
-        //String url = "https://scriptureearth.org/data/xav/sab/xav/#/text";
+    private WebDriverWait openPage(String url, WebDriver driver) {
         logger.info("Navigating to: {}", url);
         driver.get(url);
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(20));
@@ -185,13 +166,13 @@ public class SeleniumBookExtractor implements Extractor {
         return new ChromeDriver(options);
     }
 
-    @Override
-    public String getBookCodeName() {
-        return "%s_complete_raw.html".formatted(this.bookCodeName);
-    }
+    // @Override
+    // public String getBookCodeName() {
+    //     return "%s_complete_raw.html".formatted(this.bookCodeName);
+    // }
 
-    @Override
-    public String getBookContent() {
-        return this.allChaptersHtml.toString();
-    }
+    // @Override
+    // public String getBookContent() {
+    //     return this.allChaptersHtml.toString();
+    // }
 }

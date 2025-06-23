@@ -1,8 +1,11 @@
 package com.github.edurbs;
 
 import com.github.edurbs.adapter.Extractor;
+import com.github.edurbs.adapter.FormatBible;
+import com.github.edurbs.adapter.FormatBook;
 import com.github.edurbs.adapter.HtmlHandler;
 import com.github.edurbs.application.FormatBibleUseCase;
+import com.github.edurbs.application.FormatBookUseCase;
 import com.github.edurbs.infrastructure.HtmlFileHandler;
 import com.github.edurbs.infrastructure.SeleniumBookExtractor;
 
@@ -13,9 +16,10 @@ public class Main {
         String chromePath = args.length > 0 ? args[0] : "/home/eduardo/chrome-linux64/chrome";
         String chromeDriverPath = args.length > 1 ? args[1] : "/home/eduardo/chromedriver-linux64/chromedriver";
         String url = args.length > 2 ? args[2] : "https://scriptureearth.org/data/xav/sab/xav/#/text";
-        Extractor extractor = new SeleniumBookExtractor(chromePath, chromeDriverPath, url, htmlHandler );
-        FormatBibleUseCase formatBibleUseCase = new FormatBibleUseCase(extractor, htmlHandler);
-        formatBibleUseCase.execute();
+        Extractor extractor = new SeleniumBookExtractor(chromePath, chromeDriverPath, htmlHandler, url);
+        FormatBook formatBook = new FormatBookUseCase(extractor, htmlHandler);
+        FormatBible formatBible = new FormatBibleUseCase(extractor, htmlHandler, formatBook);
+        formatBible.execute();
         
     }
 }
