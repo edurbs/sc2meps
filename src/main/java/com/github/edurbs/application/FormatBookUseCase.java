@@ -32,6 +32,6 @@ public class FormatBookUseCase implements FormatBook {
     }
 
     private String getHtmlFromFile(String bookCodeName) {
-        return htmlHandler.getFileContent(bookCodeName);
+        return htmlHandler.getHtmlFileContent(bookCodeName);
     }
 }

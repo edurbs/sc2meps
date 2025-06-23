@@ -8,26 +8,45 @@ import com.github.edurbs.adapter.HtmlHandler;
 public class HtmlFileHandler implements HtmlHandler { 
     private static final Logger logger = LoggerFactory.getLogger(HtmlFileHandler.class);
     private final String filePath;
-    private static final String SUFFIX = "_complete_raw.html";
+    private static final String RAW_SUFFIX = "_complete_raw.html";
+    private static final String FORMARTTED_SUFFIX = "_complete_formatted.html";
 
     public HtmlFileHandler(String filePath) {
         this.filePath = filePath;
     }
 
     @Override
-    public void saveToFile(StringBuilder content, String bookCodeName) {
-        java.nio.file.Path path = java.nio.file.Paths.get(getFilePath(bookCodeName));
+    public void saveHtmlToFile(StringBuilder content, String bookCodeName) {
+        saveToFile(content, getHtmlFileName(bookCodeName));
+    }
+
+    @Override
+    public void saveFormattedHtmlToFile(StringBuilder content, String bookCodeName) {
+        saveToFile(content, getFormattedHtmlFileName(bookCodeName));
+    }
+
+    private void saveToFile(StringBuilder content, String fileName){
+        java.nio.file.Path path = java.nio.file.Paths.get(fileName);
         try {
             java.nio.file.Files.writeString(path, content.toString());
-            logger.info("File saved successfully to: {}", path.toAbsolutePath());
+            logger.info("Formatted file saved successfully to: {}", path.toAbsolutePath());
         } catch (java.io.IOException e) {
-            logger.error("Error saving file: {}", e.getMessage());
+            logger.error("Error saving formatted file: {}", e.getMessage());
         }
     }
 
     @Override
-    public String getFileContent(String bookCodeName) {
-        java.nio.file.Path path = java.nio.file.Paths.get(getFilePath(bookCodeName));
+    public String getHtmlFileContent(String bookCodeName) {
+        return getFileContent(getHtmlFileName(bookCodeName));
+    }
+
+    @Override
+    public String getFormattedHtmlFileContent(String bookCodeName) {
+        return getFileContent(getFormattedHtmlFileName(bookCodeName));
+    }
+   
+    private String getFileContent(String suffix) {
+        java.nio.file.Path path = java.nio.file.Paths.get(suffix);
         if (java.nio.file.Files.exists(path)) {
             try {
                 return java.nio.file.Files.readString(path);
@@ -40,8 +59,12 @@ public class HtmlFileHandler implements HtmlHandler {
         return "";
     }
 
-    private String getFilePath(String bookCodeName) {
-        return filePath + bookCodeName + SUFFIX;
+    private String getHtmlFileName(String bookCodeName) {
+        return filePath + bookCodeName + RAW_SUFFIX;
+    }
+
+    private String getFormattedHtmlFileName(String bookCodeName) {
+        return filePath + bookCodeName + FORMARTTED_SUFFIX;
     }
 
 }

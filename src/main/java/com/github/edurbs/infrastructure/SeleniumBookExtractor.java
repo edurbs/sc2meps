@@ -126,7 +126,7 @@ public class SeleniumBookExtractor implements Extractor {
 
     private void saveToFile(StringBuilder allChaptersHtml) {
         logger.info("Saving complete book to file...");
-        this.htmlHandler.saveToFile(allChaptersHtml, this.bookCodeName);
+        this.htmlHandler.saveHtmlToFile(allChaptersHtml, this.bookCodeName);
         logger.info("Book saved successfully.");
     }
 
