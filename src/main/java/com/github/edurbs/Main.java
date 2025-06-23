@@ -1,8 +1,8 @@
 package com.github.edurbs;
 
 import com.github.edurbs.adapter.Extractor;
+import com.github.edurbs.adapter.HtmlHandler;
 import com.github.edurbs.application.FormatBibleUseCase;
-import com.github.edurbs.application.HtmlHandler;
 import com.github.edurbs.infrastructure.HtmlFileHandler;
 import com.github.edurbs.infrastructure.SeleniumBookExtractor;
 

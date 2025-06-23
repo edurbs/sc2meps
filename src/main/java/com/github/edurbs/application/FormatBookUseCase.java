@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.github.edurbs.adapter.Extractor;
+import com.github.edurbs.adapter.HtmlHandler;
 
 public class FormatBookUseCase {
     private static final Logger logger = LoggerFactory.getLogger(FormatBookUseCase.class);

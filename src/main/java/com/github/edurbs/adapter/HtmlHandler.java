@@ -1,4 +1,4 @@
-package com.github.edurbs.application;
+package com.github.edurbs.adapter;
 
 public interface HtmlHandler {
     void saveToFile(StringBuilder content, String bookCodeName);

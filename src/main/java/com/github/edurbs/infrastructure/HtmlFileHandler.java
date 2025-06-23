@@ -3,7 +3,7 @@ package com.github.edurbs.infrastructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.github.edurbs.application.HtmlHandler;
+import com.github.edurbs.adapter.HtmlHandler;
 
 public class HtmlFileHandler implements HtmlHandler { 
     private static final Logger logger = LoggerFactory.getLogger(HtmlFileHandler.class);
