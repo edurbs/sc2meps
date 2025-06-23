@@ -100,6 +100,10 @@ public class SeleniumBookExtractor implements Extractor {
     }
 
     private void clickChapterLink(WebDriverWait wait, int chapterNum) {
+        if(this.chapters == 1) {
+            logger.info("Only one chapter available, skipping chapter selector click.");
+            return;
+        }
         logger.info("Clicking chapter selector: ");
         String chapterSelector = String.format("[id='%d']", chapterNum);
         WebElement chapterLink = wait.until(ExpectedConditions.elementToBeClickable(By.cssSelector(chapterSelector)));
@@ -165,14 +169,4 @@ public class SeleniumBookExtractor implements Extractor {
         options.addArguments("--disable-dev-shm-usage");
         return new ChromeDriver(options);
     }
-
-    // @Override
-    // public String getBookCodeName() {
-    //     return "%s_complete_raw.html".formatted(this.bookCodeName);
-    // }
-
-    // @Override
-    // public String getBookContent() {
-    //     return this.allChaptersHtml.toString();
-    // }
 }
