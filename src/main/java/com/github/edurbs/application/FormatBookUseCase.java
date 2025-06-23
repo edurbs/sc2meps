@@ -6,16 +6,19 @@ import org.slf4j.LoggerFactory;
 import com.github.edurbs.adapter.Extractor;
 import com.github.edurbs.adapter.FormatBook;
 import com.github.edurbs.adapter.HtmlArchiver;
+import com.github.edurbs.adapter.HtmlParser;
 import com.github.edurbs.domain.ScriptureEarthBookName;
 
 public class FormatBookUseCase implements FormatBook {
     private static final Logger logger = LoggerFactory.getLogger(FormatBookUseCase.class);
-    private final HtmlArchiver htmlHandler;
+    private final HtmlArchiver htmlArchiver;
     private final Extractor extractor;
+    private final HtmlParser htmlParser;
 
-    public FormatBookUseCase(Extractor extractor, HtmlArchiver htmlHandler) {
+    public FormatBookUseCase(Extractor extractor, HtmlArchiver htmlArchiver, HtmlParser htmlParser) {
         this.extractor = extractor;
-        this.htmlHandler = htmlHandler;
+        this.htmlArchiver = htmlArchiver;
+        this.htmlParser = htmlParser;
     }
  
     public String execute(ScriptureEarthBookName scriptureEarthBookName) {
@@ -28,21 +31,26 @@ public class FormatBookUseCase implements FormatBook {
         if (bookContent.isEmpty()) {
             logger.error("Book content is empty. Please check the extraction process. {}", bookCodeName);
         }
-        return format(bookContent);
+        String formattedBookContent = format(bookContent);
+        htmlArchiver.saveFormattedHtmlToFile(formattedBookContent, bookCodeName);
+        return formattedBookContent;
     }
 
     private String getHtmlFromFile(String bookCodeName) {
-        return htmlHandler.getHtmlFileContent(bookCodeName);
+        return htmlArchiver.getHtmlFileContent(bookCodeName);
     }
+
     private String format(String bookContent) {
-        // Implement the formatting logic here
-        // For now, just return the content as is
-        return bookContent;
+        String formattedContent = bookContent;
+        formattedContent = cleanText(formattedContent);
+        return formattedContent;
     }
 
     private String cleanText(String text) {
-        // Remove unwanted text such as introductions, comments, footers, and page numbers.
-        return text;
+        String textCleaned = text; 
+        textCleaned = htmlParser.removeDiv(textCleaned, "video-block");
+        textCleaned = htmlParser.removeDiv(textCleaned, "footer-line");
+        return textCleaned;
     }
 
 
