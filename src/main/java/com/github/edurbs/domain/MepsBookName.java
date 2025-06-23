@@ -86,12 +86,4 @@ public enum MepsBookName {
     public int getNumberOfScriptures(int chapter) {
         return scriptures[chapter - 1];
     }
-
-    public int getOrdinalValue(String book) {
-        return MepsBookName.valueOf(book.toUpperCase()).ordinal() + 1;
-    }
-
-    public int getOrdinalValue() {
-       return this.ordinal() + 1;
-    }
 }
