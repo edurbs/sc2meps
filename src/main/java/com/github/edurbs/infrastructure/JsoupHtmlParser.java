@@ -36,8 +36,24 @@ public class JsoupHtmlParser implements HtmlParser {
     public void changeElementByTagAndProperty(String tag, String property, String newTag) {
         Elements elements = document.select(tag + "[" + property + "]");
         for (Element element : elements) {
-            Element newElement = new Element(newTag);
-            newElement.html(element.html());
+            Element newElement = new Element(newTag)
+                .attr(property, element.attr(property))
+                .attr("class", element.attr("class"))
+                .attr("id", element.attr("id"))
+                .html(element.html());
+            element.replaceWith(newElement);
+        }
+    }
+
+    @Override
+    public void changeElementByClassAndProperty(String tag, String elementClass, String newTag) {
+        Elements elements = document.select(tag + "." + elementClass);
+        for (Element element : elements) {
+            Element newElement = new Element(newTag)
+                .attr("class", element.attr("class"))
+                .attr("id", element.attr("id"))
+                .attr("data-verse", element.attr("data-verse"))
+                .html(element.html());
             element.replaceWith(newElement);
         }
     }

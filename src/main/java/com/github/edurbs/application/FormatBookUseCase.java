@@ -54,7 +54,7 @@ public class FormatBookUseCase implements FormatBook {
         // Clean up soft and hard returns.
         removeGlueSpace();
         fixHardReturns();
-        removeCss();
+        removeCss();        
 
         // step 4.A.2
         // For books not containing chapters, add verse number one to the beginning of the first verse, if it has not been included in the pasted text.
@@ -64,19 +64,27 @@ public class FormatBookUseCase implements FormatBook {
         // Add curly brackets { } around the number. For example, chapter 10 would appear as {10}.
         addCurlyBracketsAroundChapterNumbers();
 
+        // step 4.A.3.b
+        // Ensure that one space exists after each chapter number.
+        addSpaceAfterChapterNumbers();
+
 
         makeVerseNumbersBold();
 
         html = htmlParser.getHtml();
     }
 
+    private void addSpaceAfterChapterNumbers() {
+        htmlParser.addSpaceAfterElementByTagAndClass("span", "c-drop");
+    }
+
     private void addCurlyBracketsAroundChapterNumbers() {
-        htmlParser.surroundElementByTagAndClassWithText("div", "c-drop", "{", "}");
+        htmlParser.surroundElementByTagAndClassWithText("span", "c-drop", "{", "}");
     }
 
     private void addVerseNumberIfMissing() {
         if (scriptureEarthBookName.getChapters() == 1) {
-            htmlParser.addTextAfterElementByTagAndClass("div", "c-drop", "span", "v", "1");
+            htmlParser.addTextAfterElementByTagAndClass("span", "c-drop", "span", "v", "1");
         }
     }
 
@@ -91,6 +99,7 @@ public class FormatBookUseCase implements FormatBook {
 
     private void fixHardReturns() {
         htmlParser.changeElementByTagAndProperty("div", "data-verse", "span");
+        htmlParser.changeElementByClassAndProperty("div", "c-drop", "span");
     }
 
     private void removeGlueSpace() {
