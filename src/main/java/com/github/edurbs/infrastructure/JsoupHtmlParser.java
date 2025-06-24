@@ -47,4 +47,12 @@ public class JsoupHtmlParser implements HtmlParser {
         }        
     }
 
+    @Override
+    public void makeElementBoldByTagAndClass(String tag, String elementClass) {
+        Elements elements = document.select(tag + "[class]."+"v");
+        for (Element element : elements) {
+            element.html("<b>" + element.html() + "</b>");
+        }
+    }
+
 }

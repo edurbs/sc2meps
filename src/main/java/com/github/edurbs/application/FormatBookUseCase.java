@@ -46,7 +46,12 @@ public class FormatBookUseCase implements FormatBook {
         cleanText();
         removeGlueSpace();
         fixHardReturns();
+        makeVerseNumbersBold();
         html = htmlParser.getHtml();
+    }
+
+    private void makeVerseNumbersBold() {
+        htmlParser.makeElementBoldByTagAndClass("span", "v");
     }
 
     private void fixHardReturns() {
