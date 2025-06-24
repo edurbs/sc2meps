@@ -65,8 +65,27 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     @Override
+    public void addTextAfterElementByTagAndClass(String tag, String elementClass, String newTag, String newClass, String text) {
+        Elements elements = document.select(tag + "." + elementClass);
+        for (Element element : elements) {
+            Element textElement = new Element(newTag)
+                    .attr("class", newClass)
+                    .text(text);
+            element.after(textElement);
+        }
+    }
+
+    @Override
+    public void surroundElementByTagAndClassWithText(String tag, String elementClass, String prefix, String suffix) {
+        Elements elements = document.select(tag + "." + elementClass);
+        for (Element element : elements) {
+            element.html(prefix + element.html() + suffix);
+        }
+    }
+
+    @Override
     public void makeElementBoldByTagAndClass(String tag, String elementClass) {
-        Elements elements = document.select(tag + "[class]."+"v");
+        Elements elements = document.select(tag + "[class]."+elementClass);
         for (Element element : elements) {
             element.html("<b>" + element.html() + "</b>");
         }

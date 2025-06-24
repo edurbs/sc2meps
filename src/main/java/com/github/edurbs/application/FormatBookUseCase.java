@@ -15,6 +15,7 @@ public class FormatBookUseCase implements FormatBook {
     private final Extractor extractor;
     private final HtmlParser htmlParser;
     private String html;
+    private ScriptureEarthBookName scriptureEarthBookName;
 
     public FormatBookUseCase(Extractor extractor, HtmlArchiver htmlArchiver, HtmlParser htmlParser) {
         this.extractor = extractor;
@@ -23,6 +24,7 @@ public class FormatBookUseCase implements FormatBook {
     }
  
     public String execute(ScriptureEarthBookName scriptureEarthBookName) {
+        this.scriptureEarthBookName = scriptureEarthBookName;
         String bookCodeName = scriptureEarthBookName.getName();
         Integer chapters = scriptureEarthBookName.getChapters();
         html = getHtmlFromFile(bookCodeName);
@@ -45,20 +47,37 @@ public class FormatBookUseCase implements FormatBook {
         htmlParser.readHtml(html);
 
         // step 3.1
+        // Remove unwanted text such as introductions, comments, footers, and page numbers.
         cleanText();
 
         // step 3.3
+        // Clean up soft and hard returns.
         removeGlueSpace();
         fixHardReturns();
         removeCss();
 
-        // step 4.A.1.a
+        // step 4.A.2
+        // For books not containing chapters, add verse number one to the beginning of the first verse, if it has not been included in the pasted text.
+        addVerseNumberIfMissing();
 
+        // step 4.A.3.a
+        // Add curly brackets { } around the number. For example, chapter 10 would appear as {10}.
+        addCurlyBracketsAroundChapterNumbers();
 
 
         makeVerseNumbersBold();
 
         html = htmlParser.getHtml();
+    }
+
+    private void addCurlyBracketsAroundChapterNumbers() {
+        htmlParser.surroundElementByTagAndClassWithText("div", "c-drop", "{", "}");
+    }
+
+    private void addVerseNumberIfMissing() {
+        if (scriptureEarthBookName.getChapters() == 1) {
+            htmlParser.addTextAfterElementByTagAndClass("div", "c-drop", "span", "v", "1");
+        }
     }
 
     private void makeVerseNumbersBold() {
