@@ -111,7 +111,7 @@ public class FormatBookUseCase implements FormatBook {
     }
 
     private void removeCss() {
-        var tagAttribute = new TagAttribute("link", "rel", "stylesheet");
+        var tagAttribute = new TagAttribute("link", "rel", "");
         htmlParser.removeElement(tagAttribute);
     }
 
