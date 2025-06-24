@@ -11,8 +11,25 @@ public class JsoupHtmlParser implements HtmlParser {
     private Document document;
 
     @Override
-    public void removeElementByClass(String elementClass) {
-        document.select("div." + elementClass).remove();
+    public void removeElementByTagAndClass(String tag, String elementClass) {
+        document.select(tag + "." + elementClass).remove();
+    }
+
+    @Override
+    public void addSpaceAfterElementByTagAndClass(String tag, String elementClass) {
+        Elements elements = document.select(tag + "." + elementClass);
+        for (Element element : elements) {
+            Element spaceElement = new Element("span").text(" "); // Non-breaking space
+            element.after(spaceElement);
+        }
+    }
+
+    @Override
+    public void removeElementByTagAndProperty(String tag, String property) {
+        Elements elements = document.select(tag + "[" + property + "]");
+        for (Element element : elements) {
+            element.remove();
+        }
     }
 
     @Override
@@ -36,7 +53,7 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     @Override
-    public void replace( String string, String replacement) {
+    public void replace(String string, String replacement) {
         Elements elements = document.getAllElements();
         for (Element element : elements) {
             String newHtml = element.html().replace(string, replacement);

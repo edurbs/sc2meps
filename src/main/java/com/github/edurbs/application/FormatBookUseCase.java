@@ -43,15 +43,31 @@ public class FormatBookUseCase implements FormatBook {
 
     private void format() {
         htmlParser.readHtml(html);
+
+        // step 3.1
         cleanText();
+
+        // step 3.3
         removeGlueSpace();
         fixHardReturns();
+        removeCss();
+
+        // step 4.A.1.a
+
+
+
         makeVerseNumbersBold();
+
         html = htmlParser.getHtml();
     }
 
     private void makeVerseNumbersBold() {
         htmlParser.makeElementBoldByTagAndClass("span", "v");
+        htmlParser.addSpaceAfterElementByTagAndClass("span", "v");
+    }
+
+    private void removeCss() {
+        htmlParser.removeElementByTagAndProperty("link", "rel");
     }
 
     private void fixHardReturns() {
@@ -60,11 +76,12 @@ public class FormatBookUseCase implements FormatBook {
 
     private void removeGlueSpace() {
         htmlParser.replace("&nbsp;", " "); // Non-breaking space
+        htmlParser.removeElementByTagAndClass("span", "vsp");
     }
 
     private void cleanText() {
-        htmlParser.removeElementByClass("video-block");
-        htmlParser.removeElementByClass("video-block");
+        htmlParser.removeElementByTagAndClass("div","video-block");
+        htmlParser.removeElementByTagAndClass("div", "footer");
     }
 
 }
