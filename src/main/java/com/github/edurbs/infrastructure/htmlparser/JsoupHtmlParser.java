@@ -18,7 +18,7 @@ public class JsoupHtmlParser implements HtmlParser {
                 tagAttribute.attributeKey()
             ));
         }
-        return document.select("%s[%s].%s".formatted(
+        return document.select("%s[%s=%s]".formatted(
             tagAttribute.tag(),
             tagAttribute.attributeKey(),
             tagAttribute.attributeValue()
@@ -73,11 +73,24 @@ public class JsoupHtmlParser implements HtmlParser {
 
     @Override
     public void addTextAfterElement(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text) {
-        for (Element element :  getElements(tagAttribute)) {
+        addTextAfterOrBeforeElement(tagAttribute, newTagAttribute, text, true);
+    }
+    
+    @Override
+    public void addTextBeforeElement(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text) {
+        addTextAfterOrBeforeElement(tagAttribute, newTagAttribute, text, false);
+    }
+
+    private void addTextAfterOrBeforeElement(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text, boolean isAfter) {
+        for (Element element : getElements(tagAttribute)) {
             Element textElement = new Element(newTagAttribute.tag())
                     .attr(newTagAttribute.attributeKey(), newTagAttribute.attributeValue())
                     .text(text);
-            element.after(textElement);
+            if(isAfter){
+                element.after(textElement);
+            }else{
+                element.before(textElement);
+            }
         }
     }
 

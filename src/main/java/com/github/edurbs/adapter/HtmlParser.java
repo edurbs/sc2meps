@@ -9,6 +9,7 @@ public interface HtmlParser {
     void removeElement(TagAttribute tagAttribute);
     void changeElement(TagAttribute tagAttribute, String newTag);
     void addTextAfterElement(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text);
+    void addTextBeforeElement(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text);
     void makeElementBold(TagAttribute tagAttribute);
     void addSpaceAfterElement(TagAttribute tagAttribute);
     void replace(String string, String replacement);

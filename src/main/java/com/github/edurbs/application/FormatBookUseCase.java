@@ -83,7 +83,11 @@ public class FormatBookUseCase implements FormatBook {
     }
 
     private void addHeader() {
-        
+        int ordinal = scriptureEarthBookName.getMepsName().getOrdinal();
+        String ordinalWithTwoNumbers = String.format("%02d", ordinal);
+        String lineHeader = "%%%s".formatted(ordinalWithTwoNumbers);
+        var tagAttribute = new TagAttribute("div", "data-verse", "title");
+        htmlParser.addTextBeforeElement(tagAttribute, new TagAttribute("div", "class", "mepsCode"), lineHeader);
     }
 
     private void addSpaceAfterChapterNumbers() {
