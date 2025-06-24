@@ -36,12 +36,12 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     @Override
-    public void removeElement(TagAttribute tagAttribute) {
+    public void removeTag(TagAttribute tagAttribute) {
         getElements(tagAttribute).remove();
     }
 
     @Override
-    public void addSpaceAfterElement(TagAttribute tagAttribute) {
+    public void addSpaceAfterText(TagAttribute tagAttribute) {
         for (Element element : getElements(tagAttribute)) {
             Element newElement = new Element(element.tagName());
             element.attributes().forEach(elementAttr -> newElement.attr(elementAttr.getKey(), elementAttr.getValue()));
@@ -51,7 +51,17 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     @Override
-    public void changeElement(TagAttribute tagAttribute, String newTag) {
+    public void addTextBefore(TagAttribute tagAttribute, String text) {
+        for (Element element : getElements(tagAttribute)) {
+            Element newElement = new Element(element.tagName());
+            element.attributes().forEach(elementAttr -> newElement.attr(elementAttr.getKey(), elementAttr.getValue()));
+            newElement.html(text + element.html());
+            element.replaceWith(newElement);
+        }
+    }
+
+    @Override
+    public void changeTag(TagAttribute tagAttribute, String newTag) {
         for (Element element : getElements(tagAttribute)) {
             Element newElement = new Element(newTag);
             element.attributes().forEach(elementAttr -> newElement.attr(elementAttr.getKey(), elementAttr.getValue()));
@@ -72,12 +82,12 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     @Override
-    public void addTextAfterElement(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text) {
+    public void addTagAfter(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text) {
         addTextAfterOrBeforeElement(tagAttribute, newTagAttribute, text, true);
     }
     
     @Override
-    public void addTextBeforeElement(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text) {
+    public void addTagBefore(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text) {
         addTextAfterOrBeforeElement(tagAttribute, newTagAttribute, text, false);
     }
 
@@ -95,14 +105,14 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     @Override
-    public void surroundElementWith(TagAttribute tagAttribute, String prefix, String suffix) {
+    public void surroundTextWith(TagAttribute tagAttribute, String prefix, String suffix) {
         for (Element element : getElements(tagAttribute)) {
             element.html(prefix + element.html() + suffix);
         }
     }
 
     @Override
-    public void makeElementBold(TagAttribute tagAttribute) {
+    public void makeTextBold(TagAttribute tagAttribute) {
         for (Element element : getElements(tagAttribute)) {
             element.html("<b>" + element.html() + "</b>");
         }

@@ -6,13 +6,14 @@ public interface HtmlParser {
     
     void readHtml(String html);
     String getHtml();
-    void removeElement(TagAttribute tagAttribute);
-    void changeElement(TagAttribute tagAttribute, String newTag);
-    void addTextAfterElement(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text);
-    void addTextBeforeElement(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text);
-    void makeElementBold(TagAttribute tagAttribute);
-    void addSpaceAfterElement(TagAttribute tagAttribute);
+    void removeTag(TagAttribute tagAttribute);
+    void changeTag(TagAttribute tagAttribute, String newTag);
+    void addTagAfter(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text);
+    void addTagBefore(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text);
+    void makeTextBold(TagAttribute tagAttribute);
+    void addSpaceAfterText(TagAttribute tagAttribute);
     void replace(String string, String replacement);
-    void surroundElementWith(TagAttribute tagAttribute, String prefix, String suffix);
+    void surroundTextWith(TagAttribute tagAttribute, String prefix, String suffix);
+    void addTextBefore(TagAttribute tagAttribute, String text);
 
 }

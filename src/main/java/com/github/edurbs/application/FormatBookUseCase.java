@@ -49,8 +49,12 @@ public class FormatBookUseCase implements FormatBook {
     private void format() {
         htmlParser.readHtml(html);
 
-        // add header
+        // step 2
+        // add meps header in first line
         addHeader();
+        // On the second line, paste or type the Bible book name and make sure it is bold.
+        makeBookNameBold();
+
 
         // step 3.1
         // Remove unwanted text such as introductions, comments, footers, and page numbers.
@@ -78,8 +82,20 @@ public class FormatBookUseCase implements FormatBook {
         makeVerseNumbersBold();
 
         // sped 4.B Title 
+        // Make sure that a Percent sign (%) appears at the start of the first line with the book number and at the start of the second line with the Bible book name.
+        addPercentSignToBookName();
 
         html = htmlParser.getHtml();
+    }
+
+    private void makeBookNameBold() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'makeBookNameBold'");
+    }
+
+    private void addPercentSignToBookName() {
+        var mt =  new TagAttribute("span", "class", "mt");
+        htmlParser.addTextBefore(mt, "%");
     }
 
     private void addHeader() {
@@ -87,56 +103,56 @@ public class FormatBookUseCase implements FormatBook {
         String ordinalWithTwoNumbers = String.format("%02d", ordinal);
         String lineHeader = "%%%s".formatted(ordinalWithTwoNumbers);
         var tagAttribute = new TagAttribute("div", "data-verse", "title");
-        htmlParser.addTextBeforeElement(tagAttribute, new TagAttribute("div", "class", "mepsCode"), lineHeader);
+        htmlParser.addTagBefore(tagAttribute, new TagAttribute("div", "class", "mepsCode"), lineHeader);
     }
 
     private void addSpaceAfterChapterNumbers() {
         var tagAttribute = new TagAttribute("span", "class", "c-drop");
-        htmlParser.addSpaceAfterElement(tagAttribute);
+        htmlParser.addSpaceAfterText(tagAttribute);
     }
 
     private void addCurlyBracketsAroundChapterNumbers() {
         var tagAttribute = new TagAttribute("span", "class", "c-drop");
-        htmlParser.surroundElementWith(tagAttribute, "{", "}");
+        htmlParser.surroundTextWith(tagAttribute, "{", "}");
     }
 
     private void addVerseNumberIfMissing() {
         if (scriptureEarthBookName.getChapters() == 1) {
             var tagAttribute = new TagAttribute("span", "class", "c-drop");
             var newTagAttribute = new TagAttribute("span", "class", "v");
-            htmlParser.addTextAfterElement(tagAttribute, newTagAttribute, "1");
+            htmlParser.addTagAfter(tagAttribute, newTagAttribute, "1");
         }
     }
 
     private void makeVerseNumbersBold() {
         var tagAttribute = new TagAttribute("span", "class", "v");
-        htmlParser.makeElementBold(tagAttribute);
-        htmlParser.addSpaceAfterElement(tagAttribute);
+        htmlParser.makeTextBold(tagAttribute);
+        htmlParser.addSpaceAfterText(tagAttribute);
     }
 
     private void removeCss() {
         var tagAttribute = new TagAttribute("link", "rel", "");
-        htmlParser.removeElement(tagAttribute);
+        htmlParser.removeTag(tagAttribute);
     }
 
     private void fixHardReturns() {
         var tagDataVerse = new TagAttribute("div", "data-verse", "");
-        htmlParser.changeElement(tagDataVerse, "span");
+        htmlParser.changeTag(tagDataVerse, "span");
         var tagCDrop = new TagAttribute("div", "class", "c-drop");
-        htmlParser.changeElement(tagCDrop, "span");
+        htmlParser.changeTag(tagCDrop, "span");
     }
 
     private void removeGlueSpace() {
         htmlParser.replace("&nbsp;", " "); // Non-breaking space
         var elementTag = new TagAttribute("span", "class", "vsp");
-        htmlParser.removeElement(elementTag);
+        htmlParser.removeTag(elementTag);
     }
 
     private void cleanText() {
         var videoTag = new TagAttribute("div", "class", "video-block");
-        htmlParser.removeElement(videoTag);
+        htmlParser.removeTag(videoTag);
         var footerTag = new TagAttribute("div", "class", "footer");
-        htmlParser.removeElement(footerTag);
+        htmlParser.removeTag(footerTag);
     }
 
 }
