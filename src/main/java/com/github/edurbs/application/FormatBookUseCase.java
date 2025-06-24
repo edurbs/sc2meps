@@ -37,7 +37,7 @@ public class FormatBookUseCase implements FormatBook {
         }
         format();
         MepsBookName mepsBookName = scriptureEarthBookName.getMepsName();
-        String formattedFileName = mepsBookName.getOrdinal()+"_"+mepsBookName.getMepsFormat();
+        String formattedFileName = mepsBookName.getMepsFormat();
         htmlArchiver.saveFormattedHtmlToFile(html, formattedFileName);
         return html;
     }
@@ -48,6 +48,9 @@ public class FormatBookUseCase implements FormatBook {
 
     private void format() {
         htmlParser.readHtml(html);
+
+        // add header
+        addHeader();
 
         // step 3.1
         // Remove unwanted text such as introductions, comments, footers, and page numbers.
@@ -77,6 +80,10 @@ public class FormatBookUseCase implements FormatBook {
         // sped 4.B Title 
 
         html = htmlParser.getHtml();
+    }
+
+    private void addHeader() {
+        
     }
 
     private void addSpaceAfterChapterNumbers() {
