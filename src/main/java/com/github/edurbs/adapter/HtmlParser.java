@@ -2,6 +2,12 @@ package com.github.edurbs.adapter;
 
 public interface HtmlParser {
 
-    String removeDiv(String html, String divClass);
+    void removeElementByClass(String elementClass);
+    void changeElementByTagAndProperty(String tag, String property, String newTag);
+
+    void replace(String string, String replacement);
+
+    void readHtml(String html);
+    String getHtml();
 
 }

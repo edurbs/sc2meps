@@ -146,16 +146,16 @@ public class SeleniumBookExtractor implements Extractor {
                 .append(".chapter { margin-bottom: 40px; border-bottom: 1px solid #eee; padding-bottom: 20px; }\n");
         allChaptersHtml.append(".chapter h2 { color: #2980b9; border-bottom: 1px solid #eee; padding-bottom: 5px; }\n");
         allChaptersHtml.append("</style>\n");
-        allChaptersHtml
-                .append("""
-                        <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/0.BD-KWcsM.css">
-                        <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-app.css">
-                        <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/BookSelector.mqkoy7lk.css">
-                        <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/19.oxaumFWT.css">
-                        <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-app.css">
-                        <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-bc-C01.css">
-                        <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/override-sab.css">
-                        """);
+        // allChaptersHtml
+        //         .append("""
+        //                 <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/0.BD-KWcsM.css">
+        //                 <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-app.css">
+        //                 <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/BookSelector.mqkoy7lk.css">
+        //                 <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/19.oxaumFWT.css">
+        //                 <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-app.css">
+        //                 <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-bc-C01.css">
+        //                 <link rel="stylesheet" href="https://www.scriptureearth.org/data/xav/sab/xav/override-sab.css">
+        //                 """);
         allChaptersHtml.append("</head><body>\n");
     }
 

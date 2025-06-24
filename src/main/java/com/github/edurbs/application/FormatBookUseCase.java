@@ -14,6 +14,7 @@ public class FormatBookUseCase implements FormatBook {
     private final HtmlArchiver htmlArchiver;
     private final Extractor extractor;
     private final HtmlParser htmlParser;
+    private String html;
 
     public FormatBookUseCase(Extractor extractor, HtmlArchiver htmlArchiver, HtmlParser htmlParser) {
         this.extractor = extractor;
@@ -24,34 +25,41 @@ public class FormatBookUseCase implements FormatBook {
     public String execute(ScriptureEarthBookName scriptureEarthBookName) {
         String bookCodeName = scriptureEarthBookName.getName();
         Integer chapters = scriptureEarthBookName.getChapters();
-        String bookContent = getHtmlFromFile(bookCodeName);
-        if (bookContent.isEmpty()) {
-            bookContent = extractor.extractBook(bookCodeName, chapters);
+        html = getHtmlFromFile(bookCodeName);
+        if (html.isEmpty()) {
+            html = extractor.extractBook(bookCodeName, chapters);
         }
-        if (bookContent.isEmpty()) {
+        if (html.isEmpty()) {
             logger.error("Book content is empty. Please check the extraction process. {}", bookCodeName);
         }
-        String formattedBookContent = format(bookContent);
-        htmlArchiver.saveFormattedHtmlToFile(formattedBookContent, bookCodeName);
-        return formattedBookContent;
+        format();
+        htmlArchiver.saveFormattedHtmlToFile(html, bookCodeName);
+        return html;
     }
 
     private String getHtmlFromFile(String bookCodeName) {
         return htmlArchiver.getHtmlFileContent(bookCodeName);
     }
 
-    private String format(String bookContent) {
-        String formattedContent = bookContent;
-        formattedContent = cleanText(formattedContent);
-        return formattedContent;
+    private void format() {
+        htmlParser.readHtml(html);
+        cleanText();
+        removeGlueSpace();
+        fixHardReturns();
+        html = htmlParser.getHtml();
     }
 
-    private String cleanText(String text) {
-        String textCleaned = text; 
-        textCleaned = htmlParser.removeDiv(textCleaned, "video-block");
-        textCleaned = htmlParser.removeDiv(textCleaned, "footer-line");
-        return textCleaned;
+    private void fixHardReturns() {
+        htmlParser.changeElementByTagAndProperty("div", "data-verse", "span");
     }
 
+    private void removeGlueSpace() {
+        htmlParser.replace("&nbsp;", " "); // Non-breaking space
+    }
+
+    private void cleanText() {
+        htmlParser.removeElementByClass("video-block");
+        htmlParser.removeElementByClass("video-block");
+    }
 
 }

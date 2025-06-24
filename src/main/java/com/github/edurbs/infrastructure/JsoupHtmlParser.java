@@ -2,20 +2,49 @@ package com.github.edurbs.infrastructure;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
+import org.jsoup.select.Elements;
 
 import com.github.edurbs.adapter.HtmlParser;
 
 public class JsoupHtmlParser implements HtmlParser {
+    private Document document;
 
     @Override
-    public String removeDiv(String html, String divClass) {
-        Document document = parseHtml(html);
-        document.select("div." + divClass).remove();
-        return document.html();
+    public void removeElementByClass(String elementClass) {
+        document.select("div." + elementClass).remove();
     }
 
-    private Document parseHtml(String html) {
-        return Jsoup.parse(html);
+    @Override
+    public void changeElementByTagAndProperty(String tag, String property, String newTag) {
+        Elements elements = document.select(tag + "[" + property + "]");
+        for (Element element : elements) {
+            Element newElement = new Element(newTag);
+            newElement.html(element.html());
+            element.replaceWith(newElement);
+        }
+    }
+
+    @Override
+    public void readHtml(String html) {
+        this.document = Jsoup.parse(html);
+    }
+
+    @Override
+    public String getHtml() {
+        return document.outerHtml();
+    }
+
+    @Override
+    public void replace( String string, String replacement) {
+        Elements elements = document.getAllElements();
+        for (Element element : elements) {
+            String newHtml = element.html().replace(string, replacement);
+            element.html(newHtml);
+            if(!element.hasText()){
+                element.remove();
+            }
+        }        
     }
 
 }
