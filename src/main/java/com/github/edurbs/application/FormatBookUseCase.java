@@ -89,8 +89,8 @@ public class FormatBookUseCase implements FormatBook {
     }
 
     private void makeBookNameBold() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'makeBookNameBold'");
+        var mt = new TagAttribute("span", "class", "mt");
+        htmlParser.makeTextBold(mt);
     }
 
     private void addPercentSignToBookName() {
