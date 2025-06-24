@@ -8,8 +8,8 @@ import com.github.edurbs.adapter.HtmlParser;
 import com.github.edurbs.application.FormatBibleUseCase;
 import com.github.edurbs.application.FormatBookUseCase;
 import com.github.edurbs.infrastructure.HtmlFileArchiver;
-import com.github.edurbs.infrastructure.JsoupHtmlParser;
 import com.github.edurbs.infrastructure.SeleniumBookExtractor;
+import com.github.edurbs.infrastructure.htmlparser.JsoupHtmlParser;
 
 public class Main {
     public static void main(String[] args) {

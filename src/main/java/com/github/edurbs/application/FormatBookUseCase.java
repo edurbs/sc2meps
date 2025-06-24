@@ -87,41 +87,52 @@ public class FormatBookUseCase implements FormatBook {
     }
 
     private void addSpaceAfterChapterNumbers() {
-        htmlParser.addSpaceAfterElementByTagAndClass("span", "c-drop");
+        var tagAttribute = new TagAttribute("span", "class", "c-drop");
+        htmlParser.addSpaceAfterElement(tagAttribute);
     }
 
     private void addCurlyBracketsAroundChapterNumbers() {
-        htmlParser.surroundElementByTagAndClassWithText("span", "c-drop", "{", "}");
+        var tagAttribute = new TagAttribute("span", "class", "c-drop");
+        htmlParser.surroundElementWith(tagAttribute, "{", "}");
     }
 
     private void addVerseNumberIfMissing() {
         if (scriptureEarthBookName.getChapters() == 1) {
-            htmlParser.addTextAfterElementByTagAndClass("span", "c-drop", "span", "v", "1");
+            var tagAttribute = new TagAttribute("span", "class", "c-drop");
+            var newTagAttribute = new TagAttribute("span", "class", "v");
+            htmlParser.addTextAfterElement(tagAttribute, newTagAttribute, "1");
         }
     }
 
     private void makeVerseNumbersBold() {
-        htmlParser.makeElementBoldByTagAndClass("span", "v");
-        htmlParser.addSpaceAfterElementByTagAndClass("span", "v");
+        var tagAttribute = new TagAttribute("span", "class", "v");
+        htmlParser.makeElementBold(tagAttribute);
+        htmlParser.addSpaceAfterElement(tagAttribute);
     }
 
     private void removeCss() {
-        htmlParser.removeElementByTagAndProperty("link", "rel");
+        var tagAttribute = new TagAttribute("link", "rel", "stylesheet");
+        htmlParser.removeElement(tagAttribute);
     }
 
     private void fixHardReturns() {
-        htmlParser.changeElementByTagAndProperty("div", "data-verse", "span");
-        htmlParser.changeElementByClassAndProperty("div", "c-drop", "span");
+        var tagDataVerse = new TagAttribute("div", "data-verse", "");
+        htmlParser.changeElement(tagDataVerse, "span");
+        var tagCDrop = new TagAttribute("div", "class", "c-drop");
+        htmlParser.changeElement(tagCDrop, "span");
     }
 
     private void removeGlueSpace() {
         htmlParser.replace("&nbsp;", " "); // Non-breaking space
-        htmlParser.removeElementByTagAndClass("span", "vsp");
+        var elementTag = new TagAttribute("span", "class", "vsp");
+        htmlParser.removeElement(elementTag);
     }
 
     private void cleanText() {
-        htmlParser.removeElementByTagAndClass("div","video-block");
-        htmlParser.removeElementByTagAndClass("div", "footer");
+        var videoTag = new TagAttribute("div", "class", "video-block");
+        htmlParser.removeElement(videoTag);
+        var footerTag = new TagAttribute("div", "class", "footer");
+        htmlParser.removeElement(footerTag);
     }
 
 }

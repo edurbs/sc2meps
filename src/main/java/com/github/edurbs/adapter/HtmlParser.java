@@ -1,17 +1,17 @@
 package com.github.edurbs.adapter;
 
+import com.github.edurbs.application.TagAttribute;
+
 public interface HtmlParser {
     
     void readHtml(String html);
     String getHtml();
-    void removeElementByTagAndClass(String tag, String elementClass);
-    void changeElementByTagAndProperty(String tag, String property, String newTag);
-    void changeElementByClassAndProperty(String tag, String elementClass, String newTag);
-    void removeElementByTagAndProperty(String tag, String property);
-    void addTextAfterElementByTagAndClass(String tag, String elementClass, String newTag, String newClass, String text);
-    void makeElementBoldByTagAndClass(String tag, String elementClass);
-    void addSpaceAfterElementByTagAndClass(String tag, String elementClass);
+    void removeElement(TagAttribute tagAttribute);
+    void changeElement(TagAttribute tagAttribute, String newTag);
+    void addTextAfterElement(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text);
+    void makeElementBold(TagAttribute tagAttribute);
+    void addSpaceAfterElement(TagAttribute tagAttribute);
     void replace(String string, String replacement);
-    void surroundElementByTagAndClassWithText(String tag, String elementClass, String prefix, String suffix);
+    void surroundElementWith(TagAttribute tagAttribute, String prefix, String suffix);
 
 }
