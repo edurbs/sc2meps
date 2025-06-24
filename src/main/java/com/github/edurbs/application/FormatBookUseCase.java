@@ -7,6 +7,7 @@ import com.github.edurbs.adapter.Extractor;
 import com.github.edurbs.adapter.FormatBook;
 import com.github.edurbs.adapter.HtmlArchiver;
 import com.github.edurbs.adapter.HtmlParser;
+import com.github.edurbs.domain.MepsBookName;
 import com.github.edurbs.domain.ScriptureEarthBookName;
 
 public class FormatBookUseCase implements FormatBook {
@@ -35,7 +36,9 @@ public class FormatBookUseCase implements FormatBook {
             logger.error("Book content is empty. Please check the extraction process. {}", bookCodeName);
         }
         format();
-        htmlArchiver.saveFormattedHtmlToFile(html, bookCodeName);
+        MepsBookName mepsBookName = scriptureEarthBookName.getMepsName();
+        String formattedFileName = mepsBookName.getOrdinal()+"_"+mepsBookName.getMepsFormat();
+        htmlArchiver.saveFormattedHtmlToFile(html, formattedFileName);
         return html;
     }
 
@@ -68,8 +71,10 @@ public class FormatBookUseCase implements FormatBook {
         // Ensure that one space exists after each chapter number.
         addSpaceAfterChapterNumbers();
 
-
+        // step 4.A.4.b
         makeVerseNumbersBold();
+
+        // sped 4.B Title 
 
         html = htmlParser.getHtml();
     }

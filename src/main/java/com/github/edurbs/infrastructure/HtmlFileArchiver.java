@@ -9,7 +9,7 @@ public class HtmlFileArchiver implements HtmlArchiver {
     private static final Logger logger = LoggerFactory.getLogger(HtmlFileArchiver.class);
     private final String filePath;
     private static final String RAW_SUFFIX = "_complete_raw.html";
-    private static final String FORMARTTED_SUFFIX = "_complete_formatted.html";
+    private static final String FORMATTED_SUFFIX = ".html";
 
     public HtmlFileArchiver(String filePath) {
         this.filePath = filePath;
@@ -64,7 +64,7 @@ public class HtmlFileArchiver implements HtmlArchiver {
     }
 
     private String getFormattedHtmlFileName(String bookCodeName) {
-        return filePath + bookCodeName + FORMARTTED_SUFFIX;
+        return filePath + bookCodeName + FORMATTED_SUFFIX;
     }
 
 }
