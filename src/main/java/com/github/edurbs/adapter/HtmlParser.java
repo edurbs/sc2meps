@@ -1,5 +1,7 @@
 package com.github.edurbs.adapter;
 
+import java.util.List;
+
 import com.github.edurbs.application.TagAttribute;
 
 public interface HtmlParser {
@@ -15,5 +17,7 @@ public interface HtmlParser {
     void replace(String string, String replacement);
     void surroundTextWith(TagAttribute tagAttribute, String prefix, String suffix);
     void addTextBefore(TagAttribute tagAttribute, String text);
+    List<String> getTags(TagAttribute tagAttribute);
+    String getTagText(TagAttribute chapterTag);
 
 }

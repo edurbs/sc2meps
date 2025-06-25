@@ -1,5 +1,7 @@
 package com.github.edurbs.infrastructure.htmlparser;
 
+import java.util.List;
+
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -116,6 +118,22 @@ public class JsoupHtmlParser implements HtmlParser {
         for (Element element : getElements(tagAttribute)) {
             element.html("<b>" + element.html() + "</b>");
         }
+    }
+
+    @Override
+    public List<String> getTags(TagAttribute tagAttribute) {
+        return getElements(tagAttribute).stream()
+                .map(Element::outerHtml)
+                .toList();
+    }
+
+    @Override
+    public String getTagText(TagAttribute chapterTag) {
+        Elements elements = getElements(chapterTag);
+        if (elements.isEmpty()) {
+            return "";
+        }
+        return elements.first().text();
     }
 
 }

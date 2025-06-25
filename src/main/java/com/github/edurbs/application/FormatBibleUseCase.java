@@ -29,14 +29,15 @@ public class FormatBibleUseCase implements FormatBible {
     public void execute() {
         books.clear();
         for (ScriptureEarthBookName scriptureEarthBook : ScriptureEarthBookName.values()) {
+            String bookNameMepsFormat = scriptureEarthBook.getMepsName().getMepsFormat();
+            logger.info("Started book: {}", bookNameMepsFormat);
             String bookContent = formatBook.execute(scriptureEarthBook);
             Book book = new Book(scriptureEarthBook, bookContent);
             books.add(book);
-            showStatus(book);
+            logger.info("Formatted book: {}", bookNameMepsFormat);
         }
     }
     private void showStatus(Book book) {
-        logger.info("Formatted book: {}", book.scriptureEarthBookName().getMepsName());
     }
 
 }

@@ -1,5 +1,8 @@
 package com.github.edurbs.application;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -9,6 +12,7 @@ import com.github.edurbs.adapter.HtmlArchiver;
 import com.github.edurbs.adapter.HtmlParser;
 import com.github.edurbs.domain.MepsBookName;
 import com.github.edurbs.domain.ScriptureEarthBookName;
+import com.github.edurbs.domain.Superscription;
 
 public class FormatBookUseCase implements FormatBook {
     private static final Logger logger = LoggerFactory.getLogger(FormatBookUseCase.class);
@@ -49,13 +53,6 @@ public class FormatBookUseCase implements FormatBook {
     private void format() {
         htmlParser.readHtml(html);
 
-        // step 2
-        // add meps header in first line
-        addHeader();
-        // On the second line, paste or type the Bible book name and make sure it is bold.
-        makeBookNameBold();
-
-
         // step 3.1
         // Remove unwanted text such as introductions, comments, footers, and page numbers.
         cleanText();
@@ -64,7 +61,7 @@ public class FormatBookUseCase implements FormatBook {
         // Clean up soft and hard returns.
         removeGlueSpace();
         fixHardReturns();
-        removeCss();        
+        //removeCss();        
 
         // step 4.A.2
         // For books not containing chapters, add verse number one to the beginning of the first verse, if it has not been included in the pasted text.
@@ -81,11 +78,61 @@ public class FormatBookUseCase implements FormatBook {
         // step 4.A.4.b
         makeVerseNumbersBold();
 
-        // sped 4.B Title 
+        // step 4.B Title 
         // Make sure that a Percent sign (%) appears at the start of the first line with the book number and at the start of the second line with the Bible book name.
         addPercentSignToBookName();
 
+        // step 4.B Headings
+        // Place a Dollar sign ($) at the start of a line with a superscription.
+        addDollarSignToSuperscription();
+
+        // step 2
+        // add meps header in first line
+        addHeader();
+        // On the second line, paste or type the Bible book name and make sure it is bold.
+        makeBookNameBold();
+
         html = htmlParser.getHtml();
+    }
+
+    private void addDollarSignToSuperscription() {
+        boolean isNotPsalm = !scriptureEarthBookName.equals(ScriptureEarthBookName.BOOK_PSA);
+        if(isNotPsalm){
+            return;
+        }
+        // TODO
+        var chapterDivisionTag = new TagAttribute("div", "class", "chapter");
+        List<String> chapters = htmlParser.getTags(chapterDivisionTag);
+        List<String> formattedChapters = new ArrayList<>();
+        for (String chapter : chapters) {
+            htmlParser.readHtml(chapter);
+            var chapterTag = new TagAttribute("span", "class", "c-drop");
+            String stringChapterNumber = htmlParser.getTagText(chapterTag);
+            if (stringChapterNumber.isEmpty()) {
+                continue;
+            }
+            stringChapterNumber = stringChapterNumber.replace("{", "").replace("}", "");
+            int chapterNumber = Integer.parseInt(stringChapterNumber);
+            if(Superscription.thisChapterHas(chapterNumber)){
+                logger.info("Adding dollar sign to chapter: {}", chapterNumber);
+                var tagAttribute = new TagAttribute("div", "id", "nonea");
+                htmlParser.addTagBefore(tagAttribute, new TagAttribute("span", "class", "superscription"), "$");
+            }
+            formattedChapters.add(htmlParser.getHtml());
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html>");
+        sb.append("<head>");
+        sb.append("<link rel=\"stylesheet\" href=\"https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/0.BD-KWcsM.css\">");
+        sb.append("<link rel=\"stylesheet\" href=\"https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-app.css\">");
+        sb.append("</head>");
+        sb.append("<body>");
+        sb.append("<div class=\"mt\"><span class=\"mt\">");
+        sb.append("%<b>Salmu</b>");
+        sb.append("</span></div>");
+        sb.append(String.join("\n", formattedChapters));
+        sb.append("</body></html>");
+        htmlParser.readHtml(sb.toString());
     }
 
     private void makeBookNameBold() {
@@ -102,8 +149,8 @@ public class FormatBookUseCase implements FormatBook {
         int ordinal = scriptureEarthBookName.getMepsName().getOrdinal();
         String ordinalWithTwoNumbers = String.format("%02d", ordinal);
         String lineHeader = "%%%s".formatted(ordinalWithTwoNumbers);
-        var tagAttribute = new TagAttribute("div", "data-verse", "title");
-        htmlParser.addTagBefore(tagAttribute, new TagAttribute("div", "class", "mepsCode"), lineHeader);
+        var tagTitle = new TagAttribute("div", "class", "mt");
+        htmlParser.addTagBefore(tagTitle, new TagAttribute("div", "class", "mepsCode"), lineHeader);
     }
 
     private void addSpaceAfterChapterNumbers() {
