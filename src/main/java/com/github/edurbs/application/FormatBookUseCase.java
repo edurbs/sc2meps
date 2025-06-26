@@ -100,7 +100,6 @@ public class FormatBookUseCase implements FormatBook {
         if(isNotPsalm){
             return;
         }
-        // TODO
         var chapterDivisionTag = new TagAttribute("div", "class", "chapter");
         List<String> chapters = htmlParser.getTags(chapterDivisionTag);
         List<String> formattedChapters = new ArrayList<>();
@@ -115,8 +114,8 @@ public class FormatBookUseCase implements FormatBook {
             int chapterNumber = Integer.parseInt(stringChapterNumber);
             if(Superscription.thisChapterHas(chapterNumber)){
                 logger.info("Adding dollar sign to chapter: {}", chapterNumber);
-                var tagAttribute = new TagAttribute("div", "id", "nonea");
-                htmlParser.addTagBefore(tagAttribute, new TagAttribute("span", "class", "superscription"), "$");
+                var tagSuperscription = new TagAttribute("span", "id", "nonea");
+                htmlParser.addTagBefore(tagSuperscription, new TagAttribute("span", "class", "superscription"), "$");
             }
             formattedChapters.add(htmlParser.getHtml());
         }
