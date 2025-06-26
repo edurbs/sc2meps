@@ -21,13 +21,14 @@ public class FormatBookUseCase implements FormatBook {
     private final HtmlParser htmlParser;
     private String html;
     private ScriptureEarthBookName scriptureEarthBookName;
+    private static final boolean EARLY_TEST = true; // Set to true for early testing, false for production
 
     public FormatBookUseCase(Extractor extractor, HtmlArchiver htmlArchiver, HtmlParser htmlParser) {
         this.extractor = extractor;
         this.htmlArchiver = htmlArchiver;
         this.htmlParser = htmlParser;
     }
- 
+
     public String execute(ScriptureEarthBookName scriptureEarthBookName) {
         this.scriptureEarthBookName = scriptureEarthBookName;
         String bookCodeName = scriptureEarthBookName.getName();
@@ -54,21 +55,24 @@ public class FormatBookUseCase implements FormatBook {
         htmlParser.readHtml(html);
 
         // step 3.1
-        // Remove unwanted text such as introductions, comments, footers, and page numbers.
+        // Remove unwanted text such as introductions, comments, footers, and page
+        // numbers.
         cleanText();
 
         // step 3.3
         // Clean up soft and hard returns.
         removeGlueSpace();
         fixHardReturns();
-        //removeCss();        
+        // removeCss();
 
         // step 4.A.2
-        // For books not containing chapters, add verse number one to the beginning of the first verse, if it has not been included in the pasted text.
+        // For books not containing chapters, add verse number one to the beginning of
+        // the first verse, if it has not been included in the pasted text.
         addVerseNumberIfMissing();
 
         // step 4.A.3.a
-        // Add curly brackets { } around the number. For example, chapter 10 would appear as {10}.
+        // Add curly brackets { } around the number. For example, chapter 10 would
+        // appear as {10}.
         addCurlyBracketsAroundChapterNumbers();
 
         // step 4.A.3.b
@@ -78,22 +82,25 @@ public class FormatBookUseCase implements FormatBook {
         // step 4.A.4.b
         makeVerseNumbersBold();
 
-        // step 4.B Title 
-        // Make sure that a Percent sign (%) appears at the start of the first line with the book number and at the start of the second line with the Bible book name.
+        // step 4.B Title
+        // Make sure that a Percent sign (%) appears at the start of the first line with
+        // the book number and at the start of the second line with the Bible book name.
         addPercentSignToBookName();
 
         // step 4.B Headings
         // Place a Dollar sign ($) at the start of a line with a superscription.
         addDollarSignToSuperscription();
-        
+
         // step 4.B Headings
-        // Place an At sign (@) at the start of a line with any heading other than a book division or superscription.
+        // Place an At sign (@) at the start of a line with any heading other than a
+        // book division or superscription.
         addAtSignToHeadings();
 
         // step 2
         // add meps header in first line
         addHeader();
-        // On the second line, paste or type the Bible book name and make sure it is bold.
+        // On the second line, paste or type the Bible book name and make sure it is
+        // bold.
         makeBookNameBold();
 
         html = htmlParser.getHtml();
@@ -105,14 +112,12 @@ public class FormatBookUseCase implements FormatBook {
         for (int i = 1; i <= 25; i++) {
             headings.add(new TagAttribute("div", "id", "s" + i));
         }
-        headings.forEach(tag ->
-            htmlParser.addTextBefore(tag, "@")
-        );
+        headings.forEach(tag -> htmlParser.addTextBefore(tag, "@"));
     }
 
     private void addDollarSignToSuperscription() {
         boolean isNotPsalm = !scriptureEarthBookName.equals(ScriptureEarthBookName.BOOK_PSA);
-        if(isNotPsalm){
+        if (isNotPsalm) {
             return;
         }
         var chapterDivisionTag = new TagAttribute("div", "class", "chapter");
@@ -127,7 +132,7 @@ public class FormatBookUseCase implements FormatBook {
             }
             stringChapterNumber = stringChapterNumber.replace("{", "").replace("}", "");
             int chapterNumber = Integer.parseInt(stringChapterNumber);
-            if(Superscription.thisChapterHas(chapterNumber)){
+            if (Superscription.thisChapterHas(chapterNumber)) {
                 logger.info("Adding dollar sign to chapter: {}", chapterNumber);
                 var tagSuperscription = new TagAttribute("span", "id", "nonea");
                 htmlParser.addTagBefore(tagSuperscription, new TagAttribute("span", "class", "superscription"), "$");
@@ -137,8 +142,12 @@ public class FormatBookUseCase implements FormatBook {
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
         sb.append("<head>");
-        sb.append("<link rel=\"stylesheet\" href=\"https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/0.BD-KWcsM.css\">");
-        sb.append("<link rel=\"stylesheet\" href=\"https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-app.css\">");
+        if (EARLY_TEST) {
+            sb.append(
+                    "<link rel=\"stylesheet\" href=\"https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/0.BD-KWcsM.css\">");
+            sb.append(
+                    "<link rel=\"stylesheet\" href=\"https://www.scriptureearth.org/data/xav/sab/xav/styles/sab-app.css\">");
+        }
         sb.append("</head>");
         sb.append("<body>");
         sb.append("<div class=\"mt\"><span class=\"mt\">");
@@ -155,7 +164,7 @@ public class FormatBookUseCase implements FormatBook {
     }
 
     private void addPercentSignToBookName() {
-        var mt =  new TagAttribute("span", "class", "mt");
+        var mt = new TagAttribute("span", "class", "mt");
         htmlParser.addTextBefore(mt, "%");
     }
 
@@ -210,6 +219,10 @@ public class FormatBookUseCase implements FormatBook {
     }
 
     private void cleanText() {
+        if(!EARLY_TEST){
+            var linkTag = new TagAttribute("link", "rel", "stylesheet");
+            htmlParser.removeTag(linkTag);
+        }
         var videoTag = new TagAttribute("div", "class", "video-block");
         htmlParser.removeTag(videoTag);
         var footerTag = new TagAttribute("div", "class", "footer");
