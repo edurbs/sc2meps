@@ -214,7 +214,8 @@ public class FormatBookUseCase implements FormatBook {
         htmlParser.removeTag(videoTag);
         var footerTag = new TagAttribute("div", "class", "footer");
         htmlParser.removeTag(footerTag);
-        // TODO remove links
+        var linkTag = new TagAttribute("div", "class", "r");
+        htmlParser.removeTag(linkTag);
     }
 
 }
