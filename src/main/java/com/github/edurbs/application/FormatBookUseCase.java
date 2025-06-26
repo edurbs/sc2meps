@@ -96,9 +96,41 @@ public class FormatBookUseCase implements FormatBook {
         // book division or superscription.
         addAtSignToHeadings();
 
+        // ********************
+        // step 4.B Poetic text
+        // ********************
+        // Add a soft return (Shift+Enter) at the end of each line.
+        // TODO
+        // Add a hard return at the end of a stanza.
+        // TODO
+        // When poetic text starts in the middle of a verse, add a soft return (Shift+Enter) to the end of the line preceding the poetic text.
+        // TODO
+        // Place an Equals sign (=) before the first chapter or verse number where poetic text starts.
+        // TODO
+        // If poetic text starts in the middle of a verse, no Equals sign (=) is necessary.
+        // TODO
+        // If a Bible book begins with poetic text, place the Equals sign (=) at the beginning of the second verse containing poetic text instead. 
+        // TODO
+        // Place a Plus sign (+) at the start of a line when body text immediately follows poetic text 
+        // TODO
+
+        // step 4.B Body text
+        // Place a Plus sign (+) at the start of a line when body text immediately follows any type of heading.
+        // TODO
+
+        // step 4.B Body footnotes
+        // Add a hard return at the end of each line with footnote text.
+        // Replace each footnote reference symbol with an Asterisk (*) in the body text.
+        // Place a Number sign (#) at the start of a line with footnote text.
+        // Place all footnote text at the end of the Bible book.
+        // TODO
+
+
+        // FINAL FORMAT
         // step 2
         // add meps header in first line
         addHeader();
+
         // On the second line, paste or type the Bible book name and make sure it is
         // bold.
         makeBookNameBold();
@@ -133,12 +165,15 @@ public class FormatBookUseCase implements FormatBook {
             stringChapterNumber = stringChapterNumber.replace("{", "").replace("}", "");
             int chapterNumber = Integer.parseInt(stringChapterNumber);
             if (Superscription.thisChapterHas(chapterNumber)) {
-                logger.info("Adding dollar sign to chapter: {}", chapterNumber);
-                var tagSuperscription = new TagAttribute("span", "id", "nonea");
-                htmlParser.addTagBefore(tagSuperscription, new TagAttribute("span", "class", "superscription"), "$");
+                addSuperscription();
             }
             formattedChapters.add(htmlParser.getHtml());
         }
+        String chapterHtml = addPsalmFooter(formattedChapters);
+        htmlParser.readHtml(chapterHtml);
+    }
+
+    private String addPsalmFooter(List<String> formattedChapters) {
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
         sb.append("<head>");
@@ -155,7 +190,20 @@ public class FormatBookUseCase implements FormatBook {
         sb.append("</span></div>");
         sb.append(String.join("\n", formattedChapters));
         sb.append("</body></html>");
-        htmlParser.readHtml(sb.toString());
+        String chapterHtml = sb.toString();
+        return chapterHtml;
+    }
+
+    private void addSuperscription() {
+        var tagSuperscription = new TagAttribute("span", "id", "nonea");
+        String superscriptionText = htmlParser.getTagText(tagSuperscription);
+        if (superscriptionText.isEmpty()) {
+            // add empy string before the tag div class m
+            var tagM = new TagAttribute("div", "class", "m");
+            htmlParser.addTagBefore(tagM, new TagAttribute("span", "id", "nonea"), "$");    
+        }else{
+            htmlParser.addTagBefore(tagSuperscription, new TagAttribute("span", "class", "superscription"), "$");
+        }
     }
 
     private void makeBookNameBold() {
