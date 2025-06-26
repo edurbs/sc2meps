@@ -85,6 +85,10 @@ public class FormatBookUseCase implements FormatBook {
         // step 4.B Headings
         // Place a Dollar sign ($) at the start of a line with a superscription.
         addDollarSignToSuperscription();
+        
+        // step 4.B Headings
+        // Place an At sign (@) at the start of a line with any heading other than a book division or superscription.
+        addAtSignToHeadings();
 
         // step 2
         // add meps header in first line
@@ -93,6 +97,17 @@ public class FormatBookUseCase implements FormatBook {
         makeBookNameBold();
 
         html = htmlParser.getHtml();
+    }
+
+    private void addAtSignToHeadings() {
+        List<TagAttribute> headings = new ArrayList<>();
+        headings.add(new TagAttribute("span", "class", "mt2"));
+        for (int i = 1; i <= 25; i++) {
+            headings.add(new TagAttribute("div", "id", "s" + i));
+        }
+        headings.forEach(tag ->
+            htmlParser.addTextBefore(tag, "@")
+        );
     }
 
     private void addDollarSignToSuperscription() {
@@ -199,6 +214,7 @@ public class FormatBookUseCase implements FormatBook {
         htmlParser.removeTag(videoTag);
         var footerTag = new TagAttribute("div", "class", "footer");
         htmlParser.removeTag(footerTag);
+        // TODO remove links
     }
 
 }

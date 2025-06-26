@@ -14,6 +14,9 @@ public class JsoupHtmlParser implements HtmlParser {
     private Document document;
 
     private Elements getElements(TagAttribute tagAttribute) {
+        if(tagAttribute.attributeKey().isEmpty()) {
+            return document.select(tagAttribute.tag());
+        }
         if(tagAttribute.attributeValue().isEmpty()) {
             return document.select("%s[%s]".formatted(
                 tagAttribute.tag(),
