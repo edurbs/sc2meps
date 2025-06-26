@@ -16,17 +16,22 @@ import com.github.edurbs.domain.Superscription;
 
 public class FormatBookUseCase implements FormatBook {
     private static final Logger logger = LoggerFactory.getLogger(FormatBookUseCase.class);
+    private static final String TAG_ATTR_CLASS = "class";
+    private static final String CLASS_C_DROP = "c-drop";
     private final HtmlArchiver htmlArchiver;
     private final Extractor extractor;
     private final HtmlParser htmlParser;
     private String html;
     private ScriptureEarthBookName scriptureEarthBookName;
-    private static final boolean EARLY_TEST = true; // Set to true for early testing, false for production
 
     public FormatBookUseCase(Extractor extractor, HtmlArchiver htmlArchiver, HtmlParser htmlParser) {
         this.extractor = extractor;
         this.htmlArchiver = htmlArchiver;
         this.htmlParser = htmlParser;
+    }
+
+    private boolean isEarlyTest() {
+        return com.github.edurbs.infrastructure.AppConfig.isEarlyTest();
     }
 
     public String execute(ScriptureEarthBookName scriptureEarthBookName) {
@@ -139,7 +144,7 @@ public class FormatBookUseCase implements FormatBook {
 
     private void addAtSignToHeadings() {
         List<TagAttribute> headings = new ArrayList<>();
-        headings.add(new TagAttribute("span", "class", "mt2"));
+        headings.add(new TagAttribute("span", TAG_ATTR_CLASS, "mt2"));
         for (int i = 1; i <= 25; i++) {
             headings.add(new TagAttribute("div", "id", "s" + i));
         }
@@ -151,12 +156,12 @@ public class FormatBookUseCase implements FormatBook {
         if (isNotPsalm) {
             return;
         }
-        var chapterDivisionTag = new TagAttribute("div", "class", "chapter");
+        var chapterDivisionTag = new TagAttribute("div", TAG_ATTR_CLASS, "chapter");
         List<String> chapters = htmlParser.getTags(chapterDivisionTag);
         List<String> formattedChapters = new ArrayList<>();
         for (String chapter : chapters) {
             htmlParser.readHtml(chapter);
-            var chapterTag = new TagAttribute("span", "class", "c-drop");
+            var chapterTag = new TagAttribute("span", TAG_ATTR_CLASS, CLASS_C_DROP);
             String stringChapterNumber = htmlParser.getTagText(chapterTag);
             if (stringChapterNumber.isEmpty()) {
                 continue;
@@ -176,7 +181,7 @@ public class FormatBookUseCase implements FormatBook {
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
         sb.append("<head>");
-        if (EARLY_TEST) {
+        if (isEarlyTest()) {
             sb.append(
                     "<link rel=\"stylesheet\" href=\"https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/0.BD-KWcsM.css\">");
             sb.append(
@@ -189,8 +194,7 @@ public class FormatBookUseCase implements FormatBook {
         sb.append("</span></div>");
         sb.append(String.join("\n", formattedChapters));
         sb.append("</body></html>");
-        String chapterHtml = sb.toString();
-        return chapterHtml;
+        return sb.toString();
     }
 
     private void addSuperscription() {
@@ -198,20 +202,20 @@ public class FormatBookUseCase implements FormatBook {
         String superscriptionText = htmlParser.getTagText(tagSuperscription);
         if (superscriptionText.isEmpty()) {
             // add empy string before the tag div class m
-            var tagM = new TagAttribute("div", "class", "m");
+            var tagM = new TagAttribute("div", TAG_ATTR_CLASS, "m");
             htmlParser.addTagBefore(tagM, new TagAttribute("span", "id", "nonea"), "$");    
         }else{
-            htmlParser.addTagBefore(tagSuperscription, new TagAttribute("span", "class", "superscription"), "$");
+            htmlParser.addTagBefore(tagSuperscription, new TagAttribute("span", TAG_ATTR_CLASS, "superscription"), "$");
         }
     }
 
     private void makeBookNameBold() {
-        var mt = new TagAttribute("span", "class", "mt");
+        var mt = new TagAttribute("span", TAG_ATTR_CLASS, "mt");
         htmlParser.makeTextBold(mt);
     }
 
     private void addPercentSignToBookName() {
-        var mt = new TagAttribute("span", "class", "mt");
+        var mt = new TagAttribute("span", TAG_ATTR_CLASS, "mt");
         htmlParser.addTextBefore(mt, "%");
     }
 
@@ -219,8 +223,8 @@ public class FormatBookUseCase implements FormatBook {
         int ordinal = scriptureEarthBookName.getMepsName().getOrdinal();
         String ordinalWithTwoNumbers = String.format("%02d", ordinal);
         String lineHeader = "%%%s".formatted(ordinalWithTwoNumbers);
-        var tagTitle = new TagAttribute("div", "class", "mt");
-        htmlParser.addTagBefore(tagTitle, new TagAttribute("div", "class", "mepsCode"), lineHeader);
+        var tagTitle = new TagAttribute("div", TAG_ATTR_CLASS, "mt");
+        htmlParser.addTagBefore(tagTitle, new TagAttribute("div", TAG_ATTR_CLASS, "mepsCode"), lineHeader);
     }
 
     private void addSpaceAfterChapterNumbers() {
@@ -250,26 +254,26 @@ public class FormatBookUseCase implements FormatBook {
     private void fixHardReturns() {
         var tagDataVerse = new TagAttribute("div", "data-verse", "");
         htmlParser.changeTag(tagDataVerse, "span");
-        var tagCDrop = new TagAttribute("div", "class", "c-drop");
+        var tagCDrop = new TagAttribute("div", TAG_ATTR_CLASS, CLASS_C_DROP);
         htmlParser.changeTag(tagCDrop, "span");
     }
 
     private void removeGlueSpace() {
         htmlParser.replace("&nbsp;", " "); // Non-breaking space
-        var elementTag = new TagAttribute("span", "class", "vsp");
+        var elementTag = new TagAttribute("span", TAG_ATTR_CLASS, "vsp");
         htmlParser.removeTag(elementTag);
     }
 
     private void cleanText() {
-        if(!EARLY_TEST){
+        if(!isEarlyTest()){
             var linkTag = new TagAttribute("link", "rel", "stylesheet");
             htmlParser.removeTag(linkTag);
         }
-        var videoTag = new TagAttribute("div", "class", "video-block");
+        var videoTag = new TagAttribute("div", TAG_ATTR_CLASS, "video-block");
         htmlParser.removeTag(videoTag);
-        var footerTag = new TagAttribute("div", "class", "footer");
+        var footerTag = new TagAttribute("div", TAG_ATTR_CLASS, "footer");
         htmlParser.removeTag(footerTag);
-        var linkTag = new TagAttribute("div", "class", "r");
+        var linkTag = new TagAttribute("div", TAG_ATTR_CLASS, "r");
         htmlParser.removeTag(linkTag);
     }
 
