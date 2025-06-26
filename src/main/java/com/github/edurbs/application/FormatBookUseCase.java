@@ -63,7 +63,6 @@ public class FormatBookUseCase implements FormatBook {
         // Clean up soft and hard returns.
         removeGlueSpace();
         fixHardReturns();
-        // removeCss();
 
         // step 4.A.2
         // For books not containing chapters, add verse number one to the beginning of
@@ -246,11 +245,6 @@ public class FormatBookUseCase implements FormatBook {
         var tagAttribute = new TagAttribute("span", "class", "v");
         htmlParser.makeTextBold(tagAttribute);
         htmlParser.addSpaceAfterText(tagAttribute);
-    }
-
-    private void removeCss() {
-        var tagAttribute = new TagAttribute("link", "rel", "");
-        htmlParser.removeTag(tagAttribute);
     }
 
     private void fixHardReturns() {
