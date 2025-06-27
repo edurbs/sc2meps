@@ -67,12 +67,25 @@ public class JsoupHtmlParser implements HtmlParser {
 
     @Override
     public void changeTag(TagAttribute tagAttribute, String newTag) {
+        changeTagAndMaybeText(tagAttribute, newTag, null);
+    }
+
+    private void changeTagAndMaybeText(TagAttribute tagAttribute, String newTag, String text) {
         for (Element element : getElements(tagAttribute)) {
             Element newElement = new Element(newTag);
             element.attributes().forEach(elementAttr -> newElement.attr(elementAttr.getKey(), elementAttr.getValue()));
-            newElement.html(element.html());
+            if (text != null) {
+                newElement.html(text);
+            } else {
+                newElement.html(element.html());
+            }
             element.replaceWith(newElement);
         }
+    }   
+
+    @Override
+    public void changeTagAndText(TagAttribute tagAttribute, String newTag, String text) {
+        changeTagAndMaybeText(tagAttribute, newTag, text);
     }
 
     @Override
@@ -124,9 +137,16 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     @Override
-    public List<String> getTags(TagAttribute tagAttribute) {
+    public List<String> getHtmlTags(TagAttribute tagAttribute) {
         return getElements(tagAttribute).stream()
                 .map(Element::outerHtml)
+                .toList();
+    }
+
+    @Override
+    public List<String> getTextTags(TagAttribute tagAttribute) {
+        return getElements(tagAttribute).stream()
+                .map(Element::text)
                 .toList();
     }
 
@@ -137,6 +157,11 @@ public class JsoupHtmlParser implements HtmlParser {
             return "";
         }
         return elements.first().text();
+    }
+
+    @Override
+    public void addHtmlAtEnd(String html) {
+        document.body().append(html);
     }
 
 }

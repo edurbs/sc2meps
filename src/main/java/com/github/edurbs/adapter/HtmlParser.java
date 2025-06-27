@@ -10,6 +10,7 @@ public interface HtmlParser {
     String getHtml();
     void removeTag(TagAttribute tagAttribute);
     void changeTag(TagAttribute tagAttribute, String newTag);
+    void changeTagAndText(TagAttribute tagAttribute, String newTag, String text);
     void addTagAfter(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text);
     void addTagBefore(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text);
     void makeTextBold(TagAttribute tagAttribute);
@@ -17,7 +18,9 @@ public interface HtmlParser {
     void replace(String string, String replacement);
     void surroundTextWith(TagAttribute tagAttribute, String prefix, String suffix);
     void addTextBefore(TagAttribute tagAttribute, String text);
-    List<String> getTags(TagAttribute tagAttribute);
+    List<String> getHtmlTags(TagAttribute tagAttribute);
+    List<String> getTextTags(TagAttribute tagAttribute);
     String getTagText(TagAttribute chapterTag);
+    void addHtmlAtEnd(String html);
 
 }

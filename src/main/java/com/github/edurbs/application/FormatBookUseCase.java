@@ -122,12 +122,10 @@ public class FormatBookUseCase implements FormatBook {
         // Place a Plus sign (+) at the start of a line when body text immediately follows any type of heading.
         // TODO
 
+        // ***********************
         // step 4.B Body footnotes
-        // Add a hard return at the end of each line with footnote text.
-        // Replace each footnote reference symbol with an Asterisk (*) in the body text.
-        // Place a Number sign (#) at the start of a line with footnote text.
-        // Place all footnote text at the end of the Bible book.
-        // TODO
+        // ***********************
+        handleFootnotes();
 
 
         // FINAL FORMAT
@@ -140,6 +138,27 @@ public class FormatBookUseCase implements FormatBook {
         makeBookNameBold();
 
         html = htmlParser.getHtml();
+    }
+
+    private void handleFootnotes() {
+        // Replace each footnote reference symbol with an Asterisk (*) in the body text.
+        // Add a hard return at the end of each line with footnote text.
+        // Place a Number sign (#) at the start of a line with footnote text.
+        // Place all footnote text at the end of the Bible book.        
+        var tagFootnoteOriginal = new TagAttribute("div", "id", "X-1");
+        List<String> allTextFootnote = htmlParser.getTextTags(tagFootnoteOriginal);
+        StringBuilder mepsFootnotes = new StringBuilder();
+        for (String textFoonote : allTextFootnote) {
+            logger.info("Footnote: {}", textFoonote);
+            String subStringUntilFirstSpace = textFoonote.substring(0, textFoonote.indexOf(" "));
+            String subStringAfterFirstSpace = textFoonote.substring(textFoonote.indexOf(" "));
+            String reference = "#"+subStringUntilFirstSpace.replace(".", ":");
+            String newFootnote = "<div>%s %s</div>".formatted(reference, subStringAfterFirstSpace);
+            mepsFootnotes.append(newFootnote);            
+        }
+        htmlParser.addHtmlAtEnd(mepsFootnotes.toString());        
+        var tagFootnoteReferenceSymbol = new TagAttribute("sup", TAG_ATTR_CLASS, "footnote");
+        htmlParser.changeTagAndText(tagFootnoteReferenceSymbol, "span", "*");
     }
 
     private void addAtSignToHeadings() {
@@ -156,18 +175,14 @@ public class FormatBookUseCase implements FormatBook {
         if (isNotPsalm) {
             return;
         }
-        var chapterDivisionTag = new TagAttribute("div", TAG_ATTR_CLASS, "chapter");
-        List<String> chapters = htmlParser.getTags(chapterDivisionTag);
+        List<String> chapters = getChapters();
         List<String> formattedChapters = new ArrayList<>();
         for (String chapter : chapters) {
             htmlParser.readHtml(chapter);
-            var chapterTag = new TagAttribute("span", TAG_ATTR_CLASS, CLASS_C_DROP);
-            String stringChapterNumber = htmlParser.getTagText(chapterTag);
-            if (stringChapterNumber.isEmpty()) {
+            int chapterNumber = getFirstChapterNumber();
+            if(chapterNumber==0){
                 continue;
             }
-            stringChapterNumber = stringChapterNumber.replace("{", "").replace("}", "");
-            int chapterNumber = Integer.parseInt(stringChapterNumber);
             if (Superscription.thisChapterHas(chapterNumber)) {
                 addSuperscription();
             }
@@ -175,6 +190,21 @@ public class FormatBookUseCase implements FormatBook {
         }
         String chapterHtml = addPsalmFooter(formattedChapters);
         htmlParser.readHtml(chapterHtml);
+    }
+
+    private List<String> getChapters() {
+        var chapterDivisionTag = new TagAttribute("div", TAG_ATTR_CLASS, "chapter");
+        return htmlParser.getHtmlTags(chapterDivisionTag);
+    }
+
+    private int getFirstChapterNumber() {
+        var chapterTag = new TagAttribute("span", TAG_ATTR_CLASS, CLASS_C_DROP);
+        String stringChapterNumber = htmlParser.getTagText(chapterTag);
+        if (stringChapterNumber.isEmpty()) {
+            return 0;
+        }
+        stringChapterNumber = stringChapterNumber.replace("{", "").replace("}", "");
+        return Integer.parseInt(stringChapterNumber);
     }
 
     private String addPsalmFooter(List<String> formattedChapters) {
