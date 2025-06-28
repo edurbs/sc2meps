@@ -19,17 +19,17 @@ public class AppConfig {
         // Prevent instantiation
     }
 
-    public static boolean isEarlyTest() {
+    public static boolean withCss() {
         if (earlyTest == null) {
-            earlyTest = loadEarlyTestFlag();
+            earlyTest = loadWithCssFlag();
         }
         return earlyTest;
     }
 
-    private static boolean loadEarlyTestFlag() {
+    private static boolean loadWithCssFlag() {
         try (InputStream is = AppConfig.class.getResourceAsStream(CONFIG_FILE)) {
             if (is == null) {
-                logger.warn("Config file {} not found, defaulting EARLY_TEST to false", CONFIG_FILE);
+                logger.warn("Config file {} not found, defaulting withCss to false", CONFIG_FILE);
                 return false;
             }
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -43,10 +43,10 @@ public class AppConfig {
             Document doc = dBuilder.parse(is);
             doc.getDocumentElement().normalize();
             Element root = doc.getDocumentElement();
-            String earlyTestValue = root.getElementsByTagName("earlyTest").item(0).getTextContent();
+            String earlyTestValue = root.getElementsByTagName("withCss").item(0).getTextContent();
             return Boolean.parseBoolean(earlyTestValue);
         } catch (Exception e) {
-            logger.error("Error reading config file, defaulting EARLY_TEST to false", e);
+            logger.error("Error reading config file, defaulting withCss to false", e);
             return false;
         }
     }

@@ -6,12 +6,15 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.github.edurbs.adapter.HtmlParser;
 import com.github.edurbs.application.TagAttribute;
 
 public class JsoupHtmlParser implements HtmlParser {
     private Document document;
+    private static final Logger logger = LoggerFactory.getLogger(JsoupHtmlParser.class);
 
     private Elements getElements(TagAttribute tagAttribute) {
         if(tagAttribute.attributeKey().isEmpty()) {
@@ -50,7 +53,8 @@ public class JsoupHtmlParser implements HtmlParser {
         for (Element element : getElements(tagAttribute)) {
             Element newElement = new Element(element.tagName());
             element.attributes().forEach(elementAttr -> newElement.attr(elementAttr.getKey(), elementAttr.getValue()));
-            newElement.html(element.html()+"&nbsp;");
+            //newElement.html(element.html()+"&nbsp;");
+            newElement.html(element.html()+" ");
             element.replaceWith(newElement);
         }
     }
@@ -162,6 +166,35 @@ public class JsoupHtmlParser implements HtmlParser {
     @Override
     public void addHtmlAtEnd(String html) {
         document.body().append(html);
+    }
+
+    @Override
+    public void prependTextToNextTagIfNotSameTag(List<TagAttribute> tagList, String string) {
+        tagList.forEach(tag -> prependTextToNextTagIfNotExistsInTagList(tag, tagList, string));
+    }
+
+    private void prependTextToNextTagIfNotExistsInTagList(TagAttribute tag,List<TagAttribute> tagList, String string) {
+        getElements(tag).forEach(element -> {
+            Element nextTag = element.nextElementSibling();
+            if(tagIsNotInTagList(tagList, nextTag)) {
+                Element elementString = new Element("span").text(string);
+                nextTag.prependChild(elementString);
+            }
+        });
+    }
+
+    private boolean tagIsNotInTagList(List<TagAttribute> tagList, Element nextTag) {
+        return nextTag != null && tagList.stream().noneMatch(t -> 
+                t.tag().equals(nextTag.tagName()) &&
+                nextTag.hasAttr(t.attributeKey()) &&
+                t.attributeValue().equals(nextTag.attr(t.attributeKey()))
+        );
+    }
+
+
+    @Override
+    public void removeStyleFromTags(String tagName) {
+        document.select("[style]").forEach(element -> element.removeAttr("style"));
     }
 
 }

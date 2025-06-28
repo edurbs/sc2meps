@@ -13,6 +13,7 @@ import com.github.edurbs.adapter.HtmlParser;
 import com.github.edurbs.domain.MepsBookName;
 import com.github.edurbs.domain.ScriptureEarthBookName;
 import com.github.edurbs.domain.Superscription;
+import com.github.edurbs.infrastructure.AppConfig;
 
 public class FormatBookUseCase implements FormatBook {
     private static final Logger logger = LoggerFactory.getLogger(FormatBookUseCase.class);
@@ -30,8 +31,8 @@ public class FormatBookUseCase implements FormatBook {
         this.htmlParser = htmlParser;
     }
 
-    private boolean isEarlyTest() {
-        return com.github.edurbs.infrastructure.AppConfig.isEarlyTest();
+    private boolean withCss() {
+        return AppConfig.withCss();
     }
 
     public String execute(ScriptureEarthBookName scriptureEarthBookName) {
@@ -68,12 +69,12 @@ public class FormatBookUseCase implements FormatBook {
         // Clean up soft and hard returns.
         removeGlueSpace();
         fixHardReturns();
-
+        
         // step 4.A.2
         // For books not containing chapters, add verse number one to the beginning of
         // the first verse, if it has not been included in the pasted text.
-        addVerseNumberIfMissing();
-
+        addVerseNumberOneIfMissing();
+        
         // step 4.A.3.a
         // Add curly brackets { } around the number. For example, chapter 10 would
         // appear as {10}.
@@ -82,7 +83,7 @@ public class FormatBookUseCase implements FormatBook {
         // step 4.A.3.b
         // Ensure that one space exists after each chapter number.
         addSpaceAfterChapterNumbers();
-
+        
         // step 4.A.4.b
         makeVerseNumbersBold();
 
@@ -94,6 +95,8 @@ public class FormatBookUseCase implements FormatBook {
         // step 4.B Headings
         // Place a Dollar sign ($) at the start of a line with a superscription.
         addDollarSignToSuperscription();
+
+
 
         // step 4.B Headings
         // Place an At sign (@) at the start of a line with any heading other than a
@@ -120,7 +123,7 @@ public class FormatBookUseCase implements FormatBook {
 
         // step 4.B Body text
         // Place a Plus sign (+) at the start of a line when body text immediately follows any type of heading.
-        // TODO
+        addPlusSignAfterHeadings();
 
         // ***********************
         // step 4.B Body footnotes
@@ -137,7 +140,20 @@ public class FormatBookUseCase implements FormatBook {
         // bold.
         makeBookNameBold();
 
+
+        if(!withCss()){
+            removeCss();
+            removeInlineNotes();
+        }
         html = htmlParser.getHtml();
+        
+    }
+
+    private void addPlusSignAfterHeadings() {
+        List<TagAttribute> mainHeadingTags = new ArrayList<>();
+        mainHeadingTags.add(new TagAttribute("span", "data-verse", "title"));
+        mainHeadingTags.add(new TagAttribute("div", TAG_ATTR_CLASS, "s"));
+        htmlParser.prependTextToNextTagIfNotSameTag(mainHeadingTags, "+");
     }
 
     private void handleFootnotes() {
@@ -148,10 +164,9 @@ public class FormatBookUseCase implements FormatBook {
         var tagFootnoteOriginal = new TagAttribute("div", "id", "X-1");
         List<String> allTextFootnote = htmlParser.getTextTags(tagFootnoteOriginal);
         StringBuilder mepsFootnotes = new StringBuilder();
-        for (String textFoonote : allTextFootnote) {
-            logger.info("Footnote: {}", textFoonote);
-            String subStringUntilFirstSpace = textFoonote.substring(0, textFoonote.indexOf(" "));
-            String subStringAfterFirstSpace = textFoonote.substring(textFoonote.indexOf(" "));
+        for (String textFootnote : allTextFootnote) {
+            String subStringUntilFirstSpace = textFootnote.substring(0, textFootnote.indexOf(" "));
+            String subStringAfterFirstSpace = textFootnote.substring(textFootnote.indexOf(" "));
             String reference = "#"+subStringUntilFirstSpace.replace(".", ":");
             String newFootnote = "<div>%s %s</div>".formatted(reference, subStringAfterFirstSpace);
             mepsFootnotes.append(newFootnote);            
@@ -162,12 +177,17 @@ public class FormatBookUseCase implements FormatBook {
     }
 
     private void addAtSignToHeadings() {
+        List<TagAttribute> headingTags = getHeadingTags();
+        headingTags.forEach(tag -> htmlParser.addTextBefore(tag, "@"));
+    }
+
+    private List<TagAttribute> getHeadingTags() {
         List<TagAttribute> headings = new ArrayList<>();
         headings.add(new TagAttribute("span", TAG_ATTR_CLASS, "mt2"));
         for (int i = 1; i <= 25; i++) {
             headings.add(new TagAttribute("div", "id", "s" + i));
         }
-        headings.forEach(tag -> htmlParser.addTextBefore(tag, "@"));
+        return headings;
     }
 
     private void addDollarSignToSuperscription() {
@@ -211,7 +231,7 @@ public class FormatBookUseCase implements FormatBook {
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
         sb.append("<head>");
-        if (isEarlyTest()) {
+        if (withCss()) {
             sb.append(
                     "<link rel=\"stylesheet\" href=\"https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/0.BD-KWcsM.css\">");
             sb.append(
@@ -219,8 +239,8 @@ public class FormatBookUseCase implements FormatBook {
         }
         sb.append("</head>");
         sb.append("<body>");
-        sb.append("<div class=\"mt\"><span class=\"mt\">");
-        sb.append("%<b>Salmu</b>");
+        sb.append("<div class=\"mt\"><span class=\"percent\">%</span><span class=\"mt\">");
+        sb.append("<b>Salmu</b>");
         sb.append("</span></div>");
         sb.append(String.join("\n", formattedChapters));
         sb.append("</body></html>");
@@ -233,7 +253,7 @@ public class FormatBookUseCase implements FormatBook {
         if (superscriptionText.isEmpty()) {
             // add empy string before the tag div class m
             var tagM = new TagAttribute("div", TAG_ATTR_CLASS, "m");
-            htmlParser.addTagBefore(tagM, new TagAttribute("span", "id", "nonea"), "$");    
+            htmlParser.addTagBefore(tagM, new TagAttribute("div", TAG_ATTR_CLASS, "d"), "$");    
         }else{
             htmlParser.addTagBefore(tagSuperscription, new TagAttribute("span", TAG_ATTR_CLASS, "superscription"), "$");
         }
@@ -246,7 +266,7 @@ public class FormatBookUseCase implements FormatBook {
 
     private void addPercentSignToBookName() {
         var mt = new TagAttribute("span", TAG_ATTR_CLASS, "mt");
-        htmlParser.addTextBefore(mt, "%");
+        htmlParser.addTagBefore(mt, new TagAttribute("span", TAG_ATTR_CLASS, "percent"), "%");
     }
 
     private void addHeader() {
@@ -258,25 +278,25 @@ public class FormatBookUseCase implements FormatBook {
     }
 
     private void addSpaceAfterChapterNumbers() {
-        var tagAttribute = new TagAttribute("span", "class", "c-drop");
+        var tagAttribute = new TagAttribute("span", TAG_ATTR_CLASS, CLASS_C_DROP);
         htmlParser.addSpaceAfterText(tagAttribute);
     }
 
     private void addCurlyBracketsAroundChapterNumbers() {
-        var tagAttribute = new TagAttribute("span", "class", "c-drop");
+        var tagAttribute = new TagAttribute("span", TAG_ATTR_CLASS, CLASS_C_DROP);
         htmlParser.surroundTextWith(tagAttribute, "{", "}");
     }
 
-    private void addVerseNumberIfMissing() {
+    private void addVerseNumberOneIfMissing() {
         if (scriptureEarthBookName.getChapters() == 1) {
-            var tagAttribute = new TagAttribute("span", "class", "c-drop");
-            var newTagAttribute = new TagAttribute("span", "class", "v");
+            var tagAttribute = new TagAttribute("span", TAG_ATTR_CLASS, CLASS_C_DROP);
+            var newTagAttribute = new TagAttribute("span", TAG_ATTR_CLASS, "v");
             htmlParser.addTagAfter(tagAttribute, newTagAttribute, "1");
         }
     }
 
     private void makeVerseNumbersBold() {
-        var tagAttribute = new TagAttribute("span", "class", "v");
+        var tagAttribute = new TagAttribute("span", TAG_ATTR_CLASS, "v");
         htmlParser.makeTextBold(tagAttribute);
         htmlParser.addSpaceAfterText(tagAttribute);
     }
@@ -295,16 +315,23 @@ public class FormatBookUseCase implements FormatBook {
     }
 
     private void cleanText() {
-        if(!isEarlyTest()){
-            var linkTag = new TagAttribute("link", "rel", "stylesheet");
-            htmlParser.removeTag(linkTag);
-        }
         var videoTag = new TagAttribute("div", TAG_ATTR_CLASS, "video-block");
         htmlParser.removeTag(videoTag);
         var footerTag = new TagAttribute("div", TAG_ATTR_CLASS, "footer");
         htmlParser.removeTag(footerTag);
         var linkTag = new TagAttribute("div", TAG_ATTR_CLASS, "r");
         htmlParser.removeTag(linkTag);
+    }
+
+    private void removeInlineNotes() {
+        TagAttribute tagInlineNote = new TagAttribute("span", "data-graft", "");
+        htmlParser.removeTag(tagInlineNote);
+    }
+
+    private void removeCss(){
+        var linkCss = new TagAttribute("link", "rel", "stylesheet");
+        htmlParser.removeTag(linkCss);
+        htmlParser.removeStyleFromTags("span");
     }
 
 }

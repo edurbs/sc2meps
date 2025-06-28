@@ -22,5 +22,7 @@ public interface HtmlParser {
     List<String> getTextTags(TagAttribute tagAttribute);
     String getTagText(TagAttribute chapterTag);
     void addHtmlAtEnd(String html);
+    void prependTextToNextTagIfNotSameTag(List<TagAttribute> tagList, String string);
+    void removeStyleFromTags(String tagName);
 
 }
