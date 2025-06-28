@@ -6,15 +6,12 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import com.github.edurbs.adapter.HtmlParser;
 import com.github.edurbs.application.TagAttribute;
 
 public class JsoupHtmlParser implements HtmlParser {
     private Document document;
-    private static final Logger logger = LoggerFactory.getLogger(JsoupHtmlParser.class);
 
     private Elements getElements(TagAttribute tagAttribute) {
         if(tagAttribute.attributeKey().isEmpty()) {
@@ -53,7 +50,6 @@ public class JsoupHtmlParser implements HtmlParser {
         for (Element element : getElements(tagAttribute)) {
             Element newElement = new Element(element.tagName());
             element.attributes().forEach(elementAttr -> newElement.attr(elementAttr.getKey(), elementAttr.getValue()));
-            //newElement.html(element.html()+"&nbsp;");
             newElement.html(element.html()+" ");
             element.replaceWith(newElement);
         }
