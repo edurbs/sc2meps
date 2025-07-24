@@ -23,7 +23,7 @@ public class SeleniumBookExtractor implements Extractor {
     private final String url;
     private String bookCodeName;
     private Integer chapters;
-    private StringBuilder allChaptersHtml = new StringBuilder();
+    private final StringBuilder allChaptersHtml = new StringBuilder();
     private final HtmlArchiver htmlHandler;
 
     public SeleniumBookExtractor(String chromePath, String chromeDriverPath, HtmlArchiver htmlHandler, String url) {
