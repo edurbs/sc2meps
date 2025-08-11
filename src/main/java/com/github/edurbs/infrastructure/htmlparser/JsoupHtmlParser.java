@@ -111,9 +111,13 @@ public class JsoupHtmlParser implements HtmlParser {
 
     private void addTextAfterOrBeforeElement(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text, boolean isAfter) {
         for (Element element : getElements(tagAttribute)) {
-            Element textElement = new Element(newTagAttribute.tag())
-                    .attr(newTagAttribute.attributeKey(), newTagAttribute.attributeValue())
-                    .text(text);
+            Element textElement = new Element(newTagAttribute.tag());
+            if(!newTagAttribute.attributeKey().isEmpty() && !newTagAttribute.attributeValue().isEmpty()) {
+                textElement.attr(newTagAttribute.attributeKey(), newTagAttribute.attributeValue());
+            }
+            if(!text.isBlank()){
+                textElement.text(text);
+            }
             if(isAfter){
                 element.after(textElement);
             }else{

@@ -15,7 +15,7 @@ import com.github.edurbs.domain.ScriptureEarthBookName;
 
 public class FormatBibleUseCase implements FormatBible {
     private static final Logger logger = LoggerFactory.getLogger(FormatBibleUseCase.class);
-    private final List<Book> books = new ArrayList<>();
+    //private final List<Book> books = new ArrayList<>();
     private final Extractor extractor;
     private final HtmlArchiver htmlHandler;
     private final FormatBook formatBook;
@@ -27,13 +27,13 @@ public class FormatBibleUseCase implements FormatBible {
     }
 
     public void execute() {
-        books.clear();
+        //books.clear();
         for (ScriptureEarthBookName scriptureEarthBook : ScriptureEarthBookName.values()) {
             String bookNameMepsFormat = scriptureEarthBook.getMepsName().getMepsFormat();
             logger.info("Started book: {}", bookNameMepsFormat);
             String bookContent = formatBook.execute(scriptureEarthBook);
             Book book = new Book(scriptureEarthBook, bookContent);
-            books.add(book);
+            //books.add(book);
             logger.info("Formatted book: {}", bookNameMepsFormat);
         }
     }

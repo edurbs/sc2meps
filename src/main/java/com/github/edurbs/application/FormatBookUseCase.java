@@ -106,20 +106,7 @@ public class FormatBookUseCase implements FormatBook {
         // ********************
         // step 4.B Poetic text
         // ********************
-        // Add a soft return (Shift+Enter) at the end of each line.
-        // TODO
-        // Add a hard return at the end of a stanza.
-        // TODO
-        // When poetic text starts in the middle of a verse, add a soft return (Shift+Enter) to the end of the line preceding the poetic text.
-        // TODO
-        // Place an Equals sign (=) before the first chapter or verse number where poetic text starts.
-        // TODO
-        // If poetic text starts in the middle of a verse, no Equals sign (=) is necessary.
-        // TODO
-        // If a Bible book begins with poetic text, place the Equals sign (=) at the beginning of the second verse containing poetic text instead. 
-        // TODO
-        // Place a Plus sign (+) at the start of a line when body text immediately follows poetic text 
-        // TODO
+        handlePoeticText();
 
         // step 4.B Body text
         // Place a Plus sign (+) at the start of a line when body text immediately follows any type of heading.
@@ -129,7 +116,6 @@ public class FormatBookUseCase implements FormatBook {
         // step 4.B Body footnotes
         // ***********************
         handleFootnotes();
-
 
         // FINAL FORMAT
         // step 2
@@ -149,6 +135,33 @@ public class FormatBookUseCase implements FormatBook {
         
     }
 
+    private void handlePoeticText() {
+        // Add a soft return (Shift+Enter) at the end of each line.
+        // TODO
+        // muda div class q para span class q
+        // adicionar <br> no final do texto
+        var tagDivPoeticText = new TagAttribute("div", "class", "q");
+        htmlParser.changeTag(tagDivPoeticText, "span");
+
+        var tagBr = new TagAttribute("br", "", "");
+        var tagSpanPoeticText = new TagAttribute("span", "class", "q");
+        htmlParser.addTagAfter(tagSpanPoeticText, tagBr, "");
+
+        // Add a hard return at the end of a stanza.
+        // TODO
+        // When poetic text starts in the middle of a verse, add a soft return (Shift+Enter) to the end of the line preceding the poetic text.
+        // TODO
+        // Place an Equals sign (=) before the first chapter or verse number where poetic text starts.
+        // TODO
+        // If poetic text starts in the middle of a verse, no Equals sign (=) is necessary.
+        // TODO
+        // If a Bible book begins with poetic text, place the Equals sign (=) at the beginning of the second verse containing poetic text instead.
+        // TODO
+        // Place a Plus sign (+) at the start of a line when body text immediately follows poetic text
+        // TODO
+
+    }
+
     private void addPlusSignAfterHeadings() {
         List<TagAttribute> mainHeadingTags = new ArrayList<>();
         mainHeadingTags.add(new TagAttribute("span", "data-verse", "title"));
@@ -163,17 +176,22 @@ public class FormatBookUseCase implements FormatBook {
         // Place all footnote text at the end of the Bible book.        
         var tagFootnoteOriginal = new TagAttribute("div", "id", "X-1");
         List<String> allTextFootnote = htmlParser.getTextTags(tagFootnoteOriginal);
+        StringBuilder mepsFootnotes = getStringBuilder(allTextFootnote);
+        htmlParser.addHtmlAtEnd(mepsFootnotes.toString());        
+        var tagFootnoteReferenceSymbol = new TagAttribute("sup", TAG_ATTR_CLASS, "footnote");
+        htmlParser.changeTagAndText(tagFootnoteReferenceSymbol, "span", "*");
+    }
+
+    private StringBuilder getStringBuilder(List<String> allTextFootnote) {
         StringBuilder mepsFootnotes = new StringBuilder();
         for (String textFootnote : allTextFootnote) {
             String subStringUntilFirstSpace = textFootnote.substring(0, textFootnote.indexOf(" "));
             String subStringAfterFirstSpace = textFootnote.substring(textFootnote.indexOf(" "));
             String reference = "#"+subStringUntilFirstSpace.replace(".", ":");
             String newFootnote = "<div>%s %s</div>".formatted(reference, subStringAfterFirstSpace);
-            mepsFootnotes.append(newFootnote);            
+            mepsFootnotes.append(newFootnote);
         }
-        htmlParser.addHtmlAtEnd(mepsFootnotes.toString());        
-        var tagFootnoteReferenceSymbol = new TagAttribute("sup", TAG_ATTR_CLASS, "footnote");
-        htmlParser.changeTagAndText(tagFootnoteReferenceSymbol, "span", "*");
+        return mepsFootnotes;
     }
 
     private void addAtSignToHeadings() {

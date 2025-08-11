@@ -15,6 +15,7 @@ public interface HtmlParser {
     void addTagBefore(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text);
     void makeTextBold(TagAttribute tagAttribute);
     void addSpaceAfterText(TagAttribute tagAttribute);
+
     void replace(String string, String replacement);
     void surroundTextWith(TagAttribute tagAttribute, String prefix, String suffix);
     void addTextBefore(TagAttribute tagAttribute, String text);
