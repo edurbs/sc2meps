@@ -174,6 +174,11 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     @Override
+    public void prependTextToNextTagIfNotSameTagAndIfIsInList(List<TagAttribute> tagList, String string, List<TagAttribute> listToPrepend){
+        tagList.forEach(tag -> prependTextToNextTagIfNotExistsInTagList(tag, listToPrepend, string));
+    }
+
+    @Override
     public void surroundTextWith(TagAttribute tagAttribute, String prefix, String suffix) {
         for (Element element : getElements(tagAttribute)) {
             element.html(prefix + element.html() + suffix);

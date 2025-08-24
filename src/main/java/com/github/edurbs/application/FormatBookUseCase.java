@@ -174,7 +174,11 @@ public class FormatBookUseCase implements FormatBook {
     private void addPlusSignAfterPoeticText() {
         List<TagAttribute> poeticTextTags = new ArrayList<>();
         poeticTextTags.add(new TagAttribute("span", TAG_ATTR_CLASS, "q"));
-        htmlParser.prependTextToNextTagIfNotSameTag(poeticTextTags, "+");
+        List<TagAttribute> normalText = new ArrayList<>();
+        normalText.add(new TagAttribute("div", TAG_ATTR_CLASS, "s"));
+        normalText.addAll(poeticTextTags);
+        htmlParser.prependTextToNextTagIfNotSameTagAndIfIsInList(poeticTextTags, "+", normalText);
+
     }
 
     private void addSoftReturnAtEndOfEachLineOfPoeticText() {

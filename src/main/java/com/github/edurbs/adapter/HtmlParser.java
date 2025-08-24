@@ -26,5 +26,5 @@ public interface HtmlParser {
     void addHtmlAtEnd(String html);
     void prependTextToNextTagIfNotSameTag(List<TagAttribute> tagList, String string);
     void removeStyleFromTags(String tagName);
-
+    void prependTextToNextTagIfNotSameTagAndIfIsInList(List<TagAttribute> tagList, String string, List<TagAttribute> listToPrepend);
 }
