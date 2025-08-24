@@ -146,7 +146,7 @@ public class FormatBookUseCase implements FormatBook {
         // ok??
 
         // When poetic text starts in the middle of a verse, add a soft return (Shift+Enter) to the end of the line preceding the poetic text.
-        // TODO
+        addSoftReturnWhenPoeticTextStartInTheMiddleOfAVerse();
 
         // Place an Equals sign (=) before the first chapter or verse number where poetic text starts.
         // TODO
@@ -158,8 +158,17 @@ public class FormatBookUseCase implements FormatBook {
         // TODO
 
         // Place a Plus sign (+) at the start of a line when body text immediately follows poetic text
-        // TODO
         addPlusSignAfterPoeticText();
+    }
+
+    private void addSoftReturnWhenPoeticTextStartInTheMiddleOfAVerse() {
+        // if after a div class P there is a span class Q, then
+        // change the div class P to span class P
+        // and add a BR as the last child of this span class P
+        var tagNormalText = new TagAttribute("div", "class", "p");
+        var tagSpanPoeticText = new TagAttribute("span", "class", "q");
+        var tagBr = new TagAttribute("br", "", "");
+        htmlParser.changeTagIfNextIsAndAddTag(tagNormalText, tagSpanPoeticText, tagBr);
     }
 
     private void addPlusSignAfterPoeticText() {

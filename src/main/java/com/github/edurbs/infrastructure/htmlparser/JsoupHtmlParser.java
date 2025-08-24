@@ -138,17 +138,39 @@ public class JsoupHtmlParser implements HtmlParser {
             if(elementIsEquals(element, nextElement)){
                 element.appendChild(childElement);
             }
-
         }
-
     }
 
     private boolean elementIsEquals(Element element, Element nextElement) {
-        if (nextElement == null) return false;
+        if (nextElement == null || element == null) return false;
         if (!element.tagName().equals(nextElement.tagName())) return false;
         if (element.attributes().size() != nextElement.attributes().size()) return false;
         return element.attributes().asList().stream()
                 .allMatch(attr -> attr.getValue().equals(nextElement.attr(attr.getKey())));
+    }
+
+    @Override
+    public void changeTagIfNextIsAndAddTag(TagAttribute tagAttribute, TagAttribute nextTag, TagAttribute newTagAttribute){
+        // if after a tagAttribute there is nextTag, then
+        // change the tagAttribute to nextTag
+        // and add a newTagAttribute as the last child of this tagAttribute
+        Element nextElement = createElement(nextTag);
+        for (Element element : getElements(tagAttribute)) {
+            Element nextElementSibling = element.nextElementSibling();
+            if(elementIsEquals(nextElementSibling, nextElement)){
+                element.tagName(nextTag.tag());
+                Element newElement = createElement(newTagAttribute);
+                element.appendChild(newElement);
+            }
+        }
+    }
+
+    private Element createElement(TagAttribute tagAttribute) {
+        Element element = new Element(tagAttribute.tag());
+        if(!tagAttribute.attributeKey().isEmpty() && !tagAttribute.attributeValue().isEmpty()) {
+            element.attr(tagAttribute.attributeKey(), tagAttribute.attributeValue());
+        }
+        return element;
     }
 
     @Override
