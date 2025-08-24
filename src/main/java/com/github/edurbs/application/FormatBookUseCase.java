@@ -137,29 +137,44 @@ public class FormatBookUseCase implements FormatBook {
 
     private void handlePoeticText() {
         // Add a soft return (Shift+Enter) at the end of each line.
-        // TODO
         // muda div class q para span class q
         // adicionar <br> no final do texto
+        addSoftReturnAtEndOfEachLineOfPoeticText();
+
+        // Add a hard return at the end of a stanza.
+        // TODO
+        // ok??
+
+        // When poetic text starts in the middle of a verse, add a soft return (Shift+Enter) to the end of the line preceding the poetic text.
+        // TODO
+
+        // Place an Equals sign (=) before the first chapter or verse number where poetic text starts.
+        // TODO
+
+        // If poetic text starts in the middle of a verse, no Equals sign (=) is necessary.
+        // TODO
+
+        // If a Bible book begins with poetic text, place the Equals sign (=) at the beginning of the second verse containing poetic text instead.
+        // TODO
+
+        // Place a Plus sign (+) at the start of a line when body text immediately follows poetic text
+        // TODO
+        addPlusSignAfterPoeticText();
+    }
+
+    private void addPlusSignAfterPoeticText() {
+        List<TagAttribute> poeticTextTags = new ArrayList<>();
+        poeticTextTags.add(new TagAttribute("span", TAG_ATTR_CLASS, "q"));
+        htmlParser.prependTextToNextTagIfNotSameTag(poeticTextTags, "+");
+    }
+
+    private void addSoftReturnAtEndOfEachLineOfPoeticText() {
         var tagDivPoeticText = new TagAttribute("div", "class", "q");
         htmlParser.changeTag(tagDivPoeticText, "span");
 
         var tagBr = new TagAttribute("br", "", "");
         var tagSpanPoeticText = new TagAttribute("span", "class", "q");
-        htmlParser.addTagAfter(tagSpanPoeticText, tagBr, "");
-
-        // Add a hard return at the end of a stanza.
-        // TODO
-        // When poetic text starts in the middle of a verse, add a soft return (Shift+Enter) to the end of the line preceding the poetic text.
-        // TODO
-        // Place an Equals sign (=) before the first chapter or verse number where poetic text starts.
-        // TODO
-        // If poetic text starts in the middle of a verse, no Equals sign (=) is necessary.
-        // TODO
-        // If a Bible book begins with poetic text, place the Equals sign (=) at the beginning of the second verse containing poetic text instead.
-        // TODO
-        // Place a Plus sign (+) at the start of a line when body text immediately follows poetic text
-        // TODO
-
+        htmlParser.addChildIfNextTagIsTheSame(tagSpanPoeticText, tagBr);
     }
 
     private void addPlusSignAfterHeadings() {

@@ -11,6 +11,7 @@ public interface HtmlParser {
     void removeTag(TagAttribute tagAttribute);
     void changeTag(TagAttribute tagAttribute, String newTag);
     void changeTagAndText(TagAttribute tagAttribute, String newTag, String text);
+    void addChildIfNextTagIsTheSame(TagAttribute parentTag, TagAttribute childTag);
     void addTagAfter(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text);
     void addTagBefore(TagAttribute tagAttribute, TagAttribute newTagAttribute, String text);
     void makeTextBold(TagAttribute tagAttribute);

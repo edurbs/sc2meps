@@ -127,6 +127,31 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     @Override
+    public void addChildIfNextTagIsTheSame(TagAttribute parentTag, TagAttribute childTag){
+        for (Element element : getElements(parentTag)) {
+            Element childElement = new Element(childTag.tag());
+            if(!childTag.attributeKey().isEmpty() && !childTag.attributeValue().isEmpty()) {
+                childElement.attr(childTag.attributeKey(), childTag.attributeValue());
+            }
+            // check if the next tag is the same, and if is the same, then add the child
+            Element nextElement = element.nextElementSibling();
+            if(elementIsEquals(element, nextElement)){
+                element.appendChild(childElement);
+            }
+
+        }
+
+    }
+
+    private boolean elementIsEquals(Element element, Element nextElement) {
+        if (nextElement == null) return false;
+        if (!element.tagName().equals(nextElement.tagName())) return false;
+        if (element.attributes().size() != nextElement.attributes().size()) return false;
+        return element.attributes().asList().stream()
+                .allMatch(attr -> attr.getValue().equals(nextElement.attr(attr.getKey())));
+    }
+
+    @Override
     public void surroundTextWith(TagAttribute tagAttribute, String prefix, String suffix) {
         for (Element element : getElements(tagAttribute)) {
             element.html(prefix + element.html() + suffix);
