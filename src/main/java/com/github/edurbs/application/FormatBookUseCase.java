@@ -142,7 +142,6 @@ public class FormatBookUseCase implements FormatBook {
         addSoftReturnAtEndOfEachLineOfPoeticText();
 
         // Add a hard return at the end of a stanza.
-        // TODO
         // ok??
 
         // When poetic text starts in the middle of a verse, add a soft return (Shift+Enter) to the end of the line preceding the poetic text.
@@ -152,11 +151,10 @@ public class FormatBookUseCase implements FormatBook {
         addEqualsSignAtVerseWherePoeticTextStarts();
 
         // If poetic text starts in the middle of a verse, no Equals sign (=) is necessary.
-        // TODO
         // ok??
 
         // If a Bible book begins with poetic text, place the Equals sign (=) at the beginning of the second verse containing poetic text instead.
-        // TODO
+        // ok??
 
         // Place a Plus sign (+) at the start of a line when body text immediately follows poetic text
         addPlusSignAfterPoeticText();
