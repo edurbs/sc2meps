@@ -181,9 +181,11 @@ public class FormatBookUseCase implements FormatBook {
         // change the div class P to span class P
         // and add a BR as the last child of this span class P
         var tagNormalText = new TagAttribute("div", "class", "p");
+        var firstVerseTag = new TagAttribute("div", "class", "m");
         var tagSpanPoeticText = new TagAttribute("span", "class", "q");
         var tagBr = new TagAttribute("br", "", "");
         htmlParser.changeTagIfNextIsAndAddTag(tagNormalText, tagSpanPoeticText, tagBr);
+        htmlParser.changeTagIfNextIsAndAddTag(firstVerseTag, tagSpanPoeticText, tagBr);
     }
 
     private void addPlusSignAfterPoeticText() {
