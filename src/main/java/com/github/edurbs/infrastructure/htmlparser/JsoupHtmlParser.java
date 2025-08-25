@@ -246,8 +246,10 @@ public class JsoupHtmlParser implements HtmlParser {
         getElements(tag).forEach(element -> {
             Element nextTag = element.nextElementSibling();
             if(tagIsNotInTagList(tagList, nextTag)) {
-                Element elementString = new Element("span").text(string);
-                nextTag.prependChild(elementString);
+                Element child = nextTag.firstElementChild();
+                if(child != null){
+                    child.prependText(string);
+                }
             }
         });
     }

@@ -108,6 +108,8 @@ public class FormatBookUseCase implements FormatBook {
         // ********************
         handlePoeticText();
 
+        handleUnitedVerses();
+
         // step 4.B Body text
         // Place a Plus sign (+) at the start of a line when body text immediately follows any type of heading.
         addPlusSignAfterHeadings();
@@ -133,6 +135,15 @@ public class FormatBookUseCase implements FormatBook {
         }
         html = htmlParser.getHtml();
         
+    }
+
+    private void handleUnitedVerses() {
+        // search for a dash -
+        // if found, then
+        //      get the next verse (this is the final united verse)
+        //      add a description at the beginning of the first united verse chapter:first-final
+        //      add the next verse to the final united verse, all with the same description: see chapter:first
+
     }
 
     private void handlePoeticText() {
@@ -209,6 +220,7 @@ public class FormatBookUseCase implements FormatBook {
         List<TagAttribute> mainHeadingTags = new ArrayList<>();
         mainHeadingTags.add(new TagAttribute("span", "data-verse", "title"));
         mainHeadingTags.add(new TagAttribute("div", TAG_ATTR_CLASS, "s"));
+        mainHeadingTags.add(new TagAttribute("div", TAG_ATTR_CLASS, "d"));
         htmlParser.prependTextToNextTagIfNotSameTag(mainHeadingTags, "+");
     }
 
@@ -269,7 +281,7 @@ public class FormatBookUseCase implements FormatBook {
             }
             formattedChapters.add(htmlParser.getHtml());
         }
-        String chapterHtml = addPsalmFooter(formattedChapters);
+        String chapterHtml = addPsalmHtml(formattedChapters);
         htmlParser.readHtml(chapterHtml);
     }
 
@@ -288,10 +300,11 @@ public class FormatBookUseCase implements FormatBook {
         return Integer.parseInt(stringChapterNumber);
     }
 
-    private String addPsalmFooter(List<String> formattedChapters) {
+    private String addPsalmHtml(List<String> formattedChapters) {
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
         sb.append("<head>");
+        sb.append("<meta charset=\"UTF-8\">");
         if (withCss()) {
             sb.append(
                     "<link rel=\"stylesheet\" href=\"https://www.scriptureearth.org/data/xav/sab/xav/_app/immutable/assets/0.BD-KWcsM.css\">");
