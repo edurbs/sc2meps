@@ -179,6 +179,23 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     @Override
+    public void addTextBeforeIfSomeChecksTrue(TagAttribute tagToSearch, String classToCheck, TagAttribute subTagToCheckAttribute, TagAttribute subTagToCheckClass, String textToAdd) {
+        for (Element element : getElements(tagToSearch)) {
+            Element lastElement = element.previousElementSibling();
+            if(lastElement != null && !lastElement.hasClass(classToCheck) && element.hasClass(classToCheck)){
+                Element firstChild = element.firstElementChild();
+                if(firstChild!= null && firstChild.tagName().equals(subTagToCheckAttribute.tag()) && firstChild.hasAttr(subTagToCheckAttribute.attributeKey())){
+                    Element firstGrandchild = firstChild.firstElementChild();
+                    if(elementIsEquals(firstGrandchild, createElement(subTagToCheckClass))){
+                        element.prependText(textToAdd);
+                    }
+                }
+
+            }
+        }
+    }
+
+    @Override
     public void surroundTextWith(TagAttribute tagAttribute, String prefix, String suffix) {
         for (Element element : getElements(tagAttribute)) {
             element.html(prefix + element.html() + suffix);

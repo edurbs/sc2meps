@@ -149,16 +149,31 @@ public class FormatBookUseCase implements FormatBook {
         addSoftReturnWhenPoeticTextStartInTheMiddleOfAVerse();
 
         // Place an Equals sign (=) before the first chapter or verse number where poetic text starts.
-        // TODO
+        addEqualsSignAtVerseWherePoeticTextStarts();
 
         // If poetic text starts in the middle of a verse, no Equals sign (=) is necessary.
         // TODO
+        // ok??
 
         // If a Bible book begins with poetic text, place the Equals sign (=) at the beginning of the second verse containing poetic text instead.
         // TODO
 
         // Place a Plus sign (+) at the start of a line when body text immediately follows poetic text
         addPlusSignAfterPoeticText();
+    }
+
+    private void addEqualsSignAtVerseWherePoeticTextStarts() {
+        // last div or span is not a class Q
+        // this span is class Q
+        // this span contains:
+        //   a span that has a attribute data-verse
+        //   and this last span has a span class v
+        //   if all true, then add Equals sign to the start of this span
+        var tagToSearch = new TagAttribute("span", TAG_ATTR_CLASS, "q");
+        String classToCheck = "q";
+        var subTagToCheckAttribute = new TagAttribute("span", "data-verse", "");
+        var subTagToCheckClass = new TagAttribute("span", TAG_ATTR_CLASS, "v");
+        htmlParser.addTextBeforeIfSomeChecksTrue(tagToSearch, classToCheck, subTagToCheckAttribute, subTagToCheckClass, "=");
     }
 
     private void addSoftReturnWhenPoeticTextStartInTheMiddleOfAVerse() {
