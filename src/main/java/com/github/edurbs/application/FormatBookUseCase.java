@@ -145,7 +145,6 @@ public class FormatBookUseCase implements FormatBook {
     }
 
     private void handleUnitedVerses() {
-        // TODO
         String dash = "-";
         String see = "ꞌMadâꞌâ";
         htmlParser.handleUnitedVerses(dash, see);
