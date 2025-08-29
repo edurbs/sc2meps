@@ -94,7 +94,7 @@ public class FormatBookUseCase implements FormatBook {
 
         // step 4.B Headings
         // Place a Dollar sign ($) at the start of a line with a superscription.
-        addDollarSignToSuperscription();
+        //addDollarSignToSuperscription();
 
 
 
@@ -109,6 +109,9 @@ public class FormatBookUseCase implements FormatBook {
         handlePoeticText();
 
         handleUnitedVerses();
+
+        // each chapter must have the correct number of scriptures
+        checkChapterSize();
 
         // step 4.B Body text
         // Place a Plus sign (+) at the start of a line when body text immediately follows any type of heading.
@@ -137,13 +140,15 @@ public class FormatBookUseCase implements FormatBook {
         
     }
 
-    private void handleUnitedVerses() {
-        // search for a dash -
-        // if found, then
-        //      get the next verse (this is the final united verse)
-        //      add a description at the beginning of the first united verse chapter:first-final
-        //      add the next verse to the final united verse, all with the same description: see chapter:first
+    private void checkChapterSize() {
+        // TODO
+    }
 
+    private void handleUnitedVerses() {
+        // TODO
+        String dash = "-";
+        String see = "ꞌMadâꞌâ";
+        htmlParser.handleUnitedVerses(dash, see);
     }
 
     private void handlePoeticText() {
@@ -221,6 +226,10 @@ public class FormatBookUseCase implements FormatBook {
         mainHeadingTags.add(new TagAttribute("span", "data-verse", "title"));
         mainHeadingTags.add(new TagAttribute("div", TAG_ATTR_CLASS, "s"));
         mainHeadingTags.add(new TagAttribute("div", TAG_ATTR_CLASS, "d"));
+        mainHeadingTags.add(new TagAttribute("div", TAG_ATTR_CLASS, "ms"));
+        for (int i = 1; i <= 25; i++) {
+            mainHeadingTags.add(new TagAttribute("div", "class", "ms" + i));
+        }
         htmlParser.prependTextToNextTagIfNotSameTag(mainHeadingTags, "+");
     }
 
@@ -229,12 +238,12 @@ public class FormatBookUseCase implements FormatBook {
         // Add a hard return at the end of each line with footnote text.
         // Place a Number sign (#) at the start of a line with footnote text.
         // Place all footnote text at the end of the Bible book.        
-        var tagFootnoteOriginal = new TagAttribute("div", "id", "X-1");
+        var tagFootnoteOriginal = new TagAttribute("div", "type", "footnote");
         List<String> allTextFootnote = htmlParser.getTextTags(tagFootnoteOriginal);
         StringBuilder mepsFootnotes = getStringBuilder(allTextFootnote);
         htmlParser.addHtmlAtEnd(mepsFootnotes.toString());        
-        var tagFootnoteReferenceSymbol = new TagAttribute("sup", TAG_ATTR_CLASS, "footnote");
-        htmlParser.changeTagAndText(tagFootnoteReferenceSymbol, "span", "*");
+//        var tagFootnoteReferenceSymbol = new TagAttribute("sup", TAG_ATTR_CLASS, "footnote");
+//        htmlParser.addSiblingBefore(tagFootnoteOriginal, "*");
     }
 
     private StringBuilder getStringBuilder(List<String> allTextFootnote) {
@@ -259,15 +268,16 @@ public class FormatBookUseCase implements FormatBook {
         headings.add(new TagAttribute("span", TAG_ATTR_CLASS, "mt2"));
         for (int i = 1; i <= 25; i++) {
             headings.add(new TagAttribute("div", "id", "s" + i));
+            headings.add(new TagAttribute("div", "id", "ms" + i));
         }
         return headings;
     }
 
     private void addDollarSignToSuperscription() {
-        boolean isNotPsalm = !scriptureEarthBookName.equals(ScriptureEarthBookName.BOOK_PSA);
-        if (isNotPsalm) {
-            return;
-        }
+        //boolean isNotPsalm = !scriptureEarthBookName.equals(ScriptureEarthBookName.BOOK_PSA);
+//        if (isNotPsalm) {
+//            return;
+//        }
         List<String> chapters = getChapters();
         List<String> formattedChapters = new ArrayList<>();
         for (String chapter : chapters) {
@@ -395,11 +405,13 @@ public class FormatBookUseCase implements FormatBook {
         htmlParser.removeTag(footerTag);
         var linkTag = new TagAttribute("div", TAG_ATTR_CLASS, "r");
         htmlParser.removeTag(linkTag);
+        var chaptersFromTo = new TagAttribute("div", TAG_ATTR_CLASS, "mr");
+        htmlParser.removeTag(chaptersFromTo);
     }
 
     private void removeInlineNotes() {
         TagAttribute tagInlineNote = new TagAttribute("span", "data-graft", "");
-        htmlParser.removeTag(tagInlineNote);
+        htmlParser.changeTagAndText(tagInlineNote, "span", "*");
     }
 
     private void removeCss(){

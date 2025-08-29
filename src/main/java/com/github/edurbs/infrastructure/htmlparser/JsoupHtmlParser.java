@@ -1,6 +1,7 @@
 package com.github.edurbs.infrastructure.htmlparser;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -29,7 +30,122 @@ public class JsoupHtmlParser implements HtmlParser {
             tagAttribute.attributeValue()
         ));
     }
-    
+
+    @Override
+    public void handleUnitedVerses(String dash, String see){
+        // search for a dash -
+        // if found, then
+        //      get the final united verse with attribute "data-verse"
+        //      add a description at the beginning of the first united verse chapter:first-final
+        //      add the next verse to the final united verse, all with the same description: see chapter:first
+        TagAttribute spanClassV = new TagAttribute("span", "class", "v");
+        final String DATA_VERSE = "data-verse";
+        for (Element elementUnited : getElements(spanClassV)){
+            Element elementUnitedParent = elementUnited.parent();
+            if(elementUnitedParent==null || !elementUnitedParent.hasAttr(DATA_VERSE)){
+                continue;
+            }
+            String dataVerse = elementUnitedParent.attr(DATA_VERSE);
+            if(!dataVerse.contains(dash)){
+                continue;
+            }
+            ChapterInfo chapterInfo = getChapterInfo(elementUnitedParent);
+            if(chapterInfo == null) {
+                continue;
+            }
+            String chapterNumberOnly = chapterInfo.chapterId().replaceAll("\\D+", "");
+            if (chapterNumberOnly.isEmpty()) {
+                continue;
+            }
+            String firstVerse = dataVerse.substring(0, dataVerse.indexOf(dash));
+            String finalVerse = dataVerse.substring(dataVerse.indexOf(dash)+1);
+            Element firstVerseNumberElement = elementUnited.select("span.v").first();
+            if(firstVerseNumberElement == null){
+                continue;
+            }
+            addFirstVerseReference(firstVerseNumberElement, firstVerse, chapterNumberOnly, finalVerse);
+            Elements afterFinalVerseElements = chapterInfo.chapterDiv().select("span[%s^=%d]".formatted(
+                    DATA_VERSE,
+                    Integer.parseInt(finalVerse) + 1
+            ));
+            if(afterFinalVerseElements.isEmpty()){
+                continue;
+            }
+            Element verseAfterFinalVerseElement = afterFinalVerseElements.first();
+            if(verseAfterFinalVerseElement== null) {
+                continue;
+            }
+            StringBuilder sb = getVerseReferences(see, firstVerse, finalVerse, chapterNumberOnly);
+            if (sb == null) continue;
+            addVerseReferences(elementUnited, verseAfterFinalVerseElement, sb);
+        }
+    }
+
+    private ChapterInfo getChapterInfo(Element elementUnitedParent) {
+        Element chapterDiv = elementUnitedParent;
+        String chapterId = "";
+        while (chapterDiv != null) {
+            if (chapterDiv.tagName().equalsIgnoreCase("div") && chapterDiv.hasClass("chapter")) {
+                chapterId = chapterDiv.id();
+                break;
+            }
+            chapterDiv = chapterDiv.parent();
+        }
+        if(chapterDiv==null){
+            return null;
+        }
+        return new ChapterInfo(chapterDiv, chapterId);
+    }
+
+    private record ChapterInfo(Element chapterDiv, String chapterId) {
+    }
+
+    private void addFirstVerseReference(Element firstVerseNumberElement, String firstVerse, String chapterNumberOnly, String finalVerse) {
+        firstVerseNumberElement.html("<b>%s</b>".formatted(firstVerse));
+        firstVerseNumberElement.append(" \uF850%s:%s-%s\uF851 ".formatted(
+                chapterNumberOnly,
+                firstVerse,
+                finalVerse
+        ));
+    }
+
+    private void addVerseReferences(Element elementUnited, Element verseAfterFinalVerseElement, StringBuilder sb) {
+        Element grandParentElementUnited = elementUnited.parent();
+        if(grandParentElementUnited==null){
+            return;
+        }
+        Element grandParentVerseAfterFinalVerseElement = verseAfterFinalVerseElement.parent();
+        if(grandParentVerseAfterFinalVerseElement==null){
+            return;
+        }
+        if(grandParentElementUnited.equals(grandParentVerseAfterFinalVerseElement)){
+            verseAfterFinalVerseElement.prepend(sb.toString());
+        }else{
+            grandParentElementUnited.append(sb.toString());
+        }
+    }
+
+    private StringBuilder getVerseReferences(String see, String firstVerse, String finalVerse, String chapterNumberOnly) {
+        int start, end;
+        try {
+            start = Integer.parseInt(firstVerse);
+            end = Integer.parseInt(finalVerse);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+        if (start > end) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        for (int i = start+1; i <= end; i++) {
+            sb.append(" <b>").append(i).append("</b> ")
+                    .append("\uF850").append(see).append(" ")
+                    .append(chapterNumberOnly).append(':').append(firstVerse)
+                    .append("\uF851 ");
+        }
+        return sb;
+    }
+
     @Override
     public void readHtml(String html) {
         this.document = Jsoup.parse(html);
@@ -66,6 +182,13 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     @Override
+    public void addSiblingBefore(TagAttribute tagAttribute, String text) {
+        for (Element element : getElements(tagAttribute)) {
+            element.before("<span>%s</span>".formatted(text));
+        }
+    }
+
+    @Override
     public void changeTag(TagAttribute tagAttribute, String newTag) {
         changeTagAndMaybeText(tagAttribute, newTag, null);
     }
@@ -74,11 +197,7 @@ public class JsoupHtmlParser implements HtmlParser {
         for (Element element : getElements(tagAttribute)) {
             Element newElement = new Element(newTag);
             element.attributes().forEach(elementAttr -> newElement.attr(elementAttr.getKey(), elementAttr.getValue()));
-            if (text != null) {
-                newElement.html(text);
-            } else {
-                newElement.html(element.html());
-            }
+            newElement.html(Objects.requireNonNullElseGet(text, element::html));
             element.replaceWith(newElement);
         }
     }   
@@ -226,10 +345,9 @@ public class JsoupHtmlParser implements HtmlParser {
     @Override
     public String getTagText(TagAttribute chapterTag) {
         Elements elements = getElements(chapterTag);
-        if (elements.isEmpty()) {
-            return "";
-        }
-        return elements.first().text();
+        Element element = elements.first();
+        if (element == null) {return "";}
+        return element.text();
     }
 
     @Override
