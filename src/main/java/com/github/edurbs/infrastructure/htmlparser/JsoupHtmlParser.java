@@ -58,47 +58,73 @@ public class JsoupHtmlParser implements HtmlParser {
 
     @Override
     public void handleUnitedVerses(String dash, String see){
-        // TODO fix when united verse is in the first verse
         boolean isChapterEnd = false;
+        boolean isFirstVerseOfChapter = false;
         TagAttribute spanClassV = new TagAttribute("span", "class", "v");
         for (Element elementUnited : getElements(spanClassV)){
-            Element unitedParent = elementUnited.parent();
-            if (unitedParent == null || !unitedParent.hasAttr(DATA_VERSE)) {
-                continue;
-            }
-            String dataVerse = unitedParent.attr(DATA_VERSE);
-            String[] range = splitVerseRange(dataVerse, dash);
-            if (range == null) {
-                continue;
-            }
-            String firstVerse = range[0];
-            String finalVerse = range[1];
-            ChapterInfo chapterInfo = getChapterInfo(unitedParent);
-            if (chapterInfo == null) {
-                continue;
-            }
-            Element firstVerseNumber = elementUnited.selectFirst("span.v");
-            if (firstVerseNumber == null){
-                continue;
-            }
-            addFirstVerseReference(firstVerseNumber, firstVerse, chapterInfo.chapterId, finalVerse);
-            Element afterFinalVerse = findVerseAfterFinalVerse(chapterInfo, finalVerse);
-            if (afterFinalVerse == null) {
-                // the union is in the last verse of the chapter
-                afterFinalVerse = chapterInfo.chapterDiv().select("span[%s^=%d]".formatted(
-                        DATA_VERSE, Integer.parseInt(firstVerse)
-                )).last();
-                isChapterEnd=true;
-            }
-            StringBuilder sb = getVerseReferences(see, firstVerse, finalVerse, chapterInfo.chapterId);
-            if (sb == null) {
-                isChapterEnd = false;
-                logger.error("Error parsing verse references for {} {}:{}-{}", see, chapterInfo.chapterId, firstVerse, finalVerse);
-                continue;
-            }
-            addVerseReferences(elementUnited, afterFinalVerse, sb, isChapterEnd);
-            isChapterEnd = false;
+            isChapterEnd = isIsChapterEnd(dash, see, elementUnited, isChapterEnd, isFirstVerseOfChapter);
         }
+        // TODO fix when united verse is in the first verse
+        isChapterEnd = false;
+        isFirstVerseOfChapter = true;
+        TagAttribute chapterTag = new TagAttribute("span", "class", "c-drop");
+        Elements chapters = getElements(chapterTag);
+        Elements firstVerses = new Elements();
+        for (Element chapter : chapters) {
+            Element nextElementSibling = chapter.nextElementSibling();
+            if (nextElementSibling != null) {
+                firstVerses.add(nextElementSibling);
+            }
+        }
+        for (Element elementUnited : firstVerses){
+            isChapterEnd = isIsChapterEnd(dash, see, elementUnited, isChapterEnd, isFirstVerseOfChapter);
+        }
+    }
+
+    private boolean isIsChapterEnd(String dash, String see, Element elementUnited, boolean isChapterEnd, boolean isFirstVerseOfChapter) {
+        Element unitedParent = elementUnited.parent();
+        if ((unitedParent == null || !unitedParent.hasAttr(DATA_VERSE)) && !isFirstVerseOfChapter) {
+            return isChapterEnd;
+        }
+        if(isFirstVerseOfChapter){
+            unitedParent = elementUnited;
+        }
+        String dataVerse = unitedParent.attr(DATA_VERSE);
+        String[] range = splitVerseRange(dataVerse, dash);
+        if (range == null) {
+            return isChapterEnd;
+        }
+        String firstVerse = range[0];
+        String finalVerse = range[1];
+        ChapterInfo chapterInfo = getChapterInfo(unitedParent);
+        if (chapterInfo == null) {
+            return isChapterEnd;
+        }
+        Element firstVerseNumber = elementUnited.selectFirst("span.v");
+        if (isFirstVerseOfChapter) {
+            firstVerseNumber = elementUnited.previousElementSibling();
+        }
+        if (firstVerseNumber == null){
+            return isChapterEnd;
+        }
+        addFirstVerseReference(firstVerseNumber, firstVerse, chapterInfo.chapterId, finalVerse);
+        Element afterFinalVerse = findVerseAfterFinalVerse(chapterInfo, finalVerse);
+        if (afterFinalVerse == null) {
+            // the union is in the last verse of the chapter
+            afterFinalVerse = chapterInfo.chapterDiv().select("span[%s^=%d]".formatted(
+                    DATA_VERSE, Integer.parseInt(firstVerse)
+            )).last();
+            isChapterEnd =true;
+        }
+        StringBuilder sb = getVerseReferences(see, firstVerse, finalVerse, chapterInfo.chapterId);
+        if (sb == null) {
+            isChapterEnd = false;
+            logger.error("Error parsing verse references for {} {}:{}-{}", see, chapterInfo.chapterId, firstVerse, finalVerse);
+            return isChapterEnd;
+        }
+        addVerseReferences(elementUnited, afterFinalVerse, sb, isChapterEnd);
+        isChapterEnd = false;
+        return isChapterEnd;
     }
 
     private String[] splitVerseRange(String dataVerse, String separator) {
