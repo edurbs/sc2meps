@@ -37,7 +37,7 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     @Override
-    public void checkTotalVerses(List<Integer> chaptersSize, String book){
+    public void checkTotalVerses(List<Integer> chaptersSize, String book, int numberOfChapters){
         getElements(new TagAttribute("div", "class", "chapter")).forEach(chapter -> {
             ChapterInfo chapterInfo = getChapterInfo(chapter);
             if(chapterInfo==null){
@@ -48,7 +48,7 @@ public class JsoupHtmlParser implements HtmlParser {
                 logger.error("Chapter {} not found", chapterNumber);
             }
             Elements verses = chapter.select("span.v");
-            Integer versesFound = verses.size()+1;
+            Integer versesFound = verses.size()+(numberOfChapters==1 ? 0 : 1);
             Integer totalVerses = chaptersSize.get(chapterNumber - 1);
             if(!Objects.equals(totalVerses, versesFound)){
                 logger.error("In book {}, chapter {} has {} verses, but should have {}", book, chapterNumber, versesFound, totalVerses);

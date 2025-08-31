@@ -31,5 +31,5 @@ public interface HtmlParser {
     void addSiblingBefore(TagAttribute tag, String text);
     void handleUnitedVerses(String dash, String see);
 
-    void checkTotalVerses(List<Integer> chaptersSize, String book);
+    void checkTotalVerses(List<Integer> chaptersSize, String book, int numberOfChapters);
 }
