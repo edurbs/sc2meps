@@ -3,7 +3,6 @@ package com.github.edurbs.infrastructure.htmlparser;
 import java.util.List;
 import java.util.Objects;
 
-import com.github.edurbs.application.FormatBookUseCase;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -62,7 +61,7 @@ public class JsoupHtmlParser implements HtmlParser {
         boolean isFirstVerseOfChapter = false;
         TagAttribute spanClassV = new TagAttribute("span", "class", "v");
         for (Element elementUnited : getElements(spanClassV)){
-            isChapterEnd = isIsChapterEnd(dash, see, elementUnited, isChapterEnd, isFirstVerseOfChapter);
+            isChapterEnd = checkElementUnited(dash, see, elementUnited, isChapterEnd, isFirstVerseOfChapter);
         }
         isChapterEnd = false;
         isFirstVerseOfChapter = true;
@@ -76,11 +75,11 @@ public class JsoupHtmlParser implements HtmlParser {
             }
         }
         for (Element elementUnited : firstVerses){
-            isChapterEnd = isIsChapterEnd(dash, see, elementUnited, isChapterEnd, isFirstVerseOfChapter);
+            isChapterEnd = checkElementUnited(dash, see, elementUnited, isChapterEnd, isFirstVerseOfChapter);
         }
     }
 
-    private boolean isIsChapterEnd(String dash, String see, Element elementUnited, boolean isChapterEnd, boolean isFirstVerseOfChapter) {
+    private boolean checkElementUnited(String dash, String see, Element elementUnited, boolean isChapterEnd, boolean isFirstVerseOfChapter) {
         Element unitedParent = elementUnited.parent();
         if ((unitedParent == null || !unitedParent.hasAttr(DATA_VERSE)) && !isFirstVerseOfChapter) {
             return isChapterEnd;
@@ -102,6 +101,8 @@ public class JsoupHtmlParser implements HtmlParser {
         Element firstVerseNumber = elementUnited.selectFirst("span.v");
         if (isFirstVerseOfChapter) {
             firstVerseNumber = elementUnited.previousElementSibling();
+        }else if(firstVerseNumber!=null){
+            firstVerseNumber.html("<b>%s</b>".formatted(firstVerse));
         }
         if (firstVerseNumber == null){
             return isChapterEnd;
@@ -176,7 +177,6 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     private void addFirstVerseReference(Element firstVerseNumberElement, String firstVerse, String chapterNumberOnly, String finalVerse) {
-        //firstVerseNumberElement.html(" <b>%s</b> ".formatted(firstVerse));
         firstVerseNumberElement.append(" \uF850%s:%s-%s\uF851 ".formatted(
                 chapterNumberOnly,
                 firstVerse,
