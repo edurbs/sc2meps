@@ -141,7 +141,11 @@ public class FormatBookUseCase implements FormatBook {
     }
 
     private void checkChapterSize() {
-        // TODO
+        List<Integer> chaptersSize = new ArrayList<>();
+        for (int chapterNumber = 1; chapterNumber <= scriptureEarthBookName.getChapters(); chapterNumber++) {
+            chaptersSize.add(scriptureEarthBookName.getNumberOfScriptures(chapterNumber));
+        }
+        htmlParser.checkTotalVerses(chaptersSize, scriptureEarthBookName.getMepsName().name());
     }
 
     private void handleUnitedVerses() {

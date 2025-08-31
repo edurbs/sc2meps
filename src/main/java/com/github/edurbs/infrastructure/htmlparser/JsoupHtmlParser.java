@@ -3,6 +3,7 @@ package com.github.edurbs.infrastructure.htmlparser;
 import java.util.List;
 import java.util.Objects;
 
+import com.github.edurbs.application.FormatBookUseCase;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
@@ -10,8 +11,11 @@ import org.jsoup.select.Elements;
 
 import com.github.edurbs.adapter.HtmlParser;
 import com.github.edurbs.application.TagAttribute;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class JsoupHtmlParser implements HtmlParser {
+    private static final Logger logger = LoggerFactory.getLogger(JsoupHtmlParser.class);
     private Document document;
     private final String DATA_VERSE = "data-verse";
 
@@ -33,7 +37,29 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     @Override
+    public void checkTotalVerses(List<Integer> chaptersSize, String book){
+        getElements(new TagAttribute("div", "class", "chapter")).forEach(chapter -> {
+            ChapterInfo chapterInfo = getChapterInfo(chapter);
+            if(chapterInfo==null){
+                return;
+            }
+            int chapterNumber = Integer.parseInt(chapterInfo.chapterId);
+            if(chaptersSize.get(chapterNumber - 1) == 0){
+                logger.error("Chapter {} not found", chapterNumber);
+            }
+            Elements verses = chapter.select("span.v");
+            Integer versesFound = verses.size()+1;
+            Integer totalVerses = chaptersSize.get(chapterNumber - 1);
+            if(!Objects.equals(totalVerses, versesFound)){
+                logger.error("In book {}, chapter {} has {} verses, but should have {}", book, chapterNumber, versesFound, totalVerses);
+            }
+        });
+    }
+
+    @Override
     public void handleUnitedVerses(String dash, String see){
+        // TODO fix when united verse is in the first verse
+        boolean isChapterEnd = false;
         TagAttribute spanClassV = new TagAttribute("span", "class", "v");
         for (Element elementUnited : getElements(spanClassV)){
             Element unitedParent = elementUnited.parent();
@@ -58,13 +84,20 @@ public class JsoupHtmlParser implements HtmlParser {
             addFirstVerseReference(firstVerseNumber, firstVerse, chapterInfo.chapterId, finalVerse);
             Element afterFinalVerse = findVerseAfterFinalVerse(chapterInfo, finalVerse);
             if (afterFinalVerse == null) {
-                continue;
+                // the union is in the last verse of the chapter
+                afterFinalVerse = chapterInfo.chapterDiv().select("span[%s^=%d]".formatted(
+                        DATA_VERSE, Integer.parseInt(firstVerse)
+                )).last();
+                isChapterEnd=true;
             }
             StringBuilder sb = getVerseReferences(see, firstVerse, finalVerse, chapterInfo.chapterId);
             if (sb == null) {
+                isChapterEnd = false;
+                logger.error("Error parsing verse references for {} {}:{}-{}", see, chapterInfo.chapterId, firstVerse, finalVerse);
                 continue;
             }
-            addVerseReferences(elementUnited, afterFinalVerse, sb);
+            addVerseReferences(elementUnited, afterFinalVerse, sb, isChapterEnd);
+            isChapterEnd = false;
         }
     }
 
@@ -118,7 +151,7 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     private void addFirstVerseReference(Element firstVerseNumberElement, String firstVerse, String chapterNumberOnly, String finalVerse) {
-        firstVerseNumberElement.html("<b>%s</b>".formatted(firstVerse));
+        //firstVerseNumberElement.html(" <b>%s</b> ".formatted(firstVerse));
         firstVerseNumberElement.append(" \uF850%s:%s-%s\uF851 ".formatted(
                 chapterNumberOnly,
                 firstVerse,
@@ -126,8 +159,12 @@ public class JsoupHtmlParser implements HtmlParser {
         ));
     }
 
-    private void addVerseReferences(Element elementUnited, Element verseAfterFinalVerseElement, StringBuilder sb) {
-        Element grandParentElementUnited = elementUnited.parent();
+    private void addVerseReferences(Element elementUnited, Element verseAfterFinalVerseElement, StringBuilder sb, boolean isInChapterEnd) {
+        Element elementUnitedParent = elementUnited.parent();
+        if(elementUnitedParent==null){
+            return;
+        }
+        Element grandParentElementUnited = elementUnitedParent.parent();
         if(grandParentElementUnited==null){
             return;
         }
@@ -135,7 +172,9 @@ public class JsoupHtmlParser implements HtmlParser {
         if(grandParentVerseAfterFinalVerseElement==null){
             return;
         }
-        if(grandParentElementUnited.equals(grandParentVerseAfterFinalVerseElement)){
+        if(isInChapterEnd){
+            verseAfterFinalVerseElement.append(sb.toString());
+        }else if(grandParentElementUnited.equals(grandParentVerseAfterFinalVerseElement)){
             verseAfterFinalVerseElement.prepend(sb.toString());
         }else{
             grandParentElementUnited.append(sb.toString());
@@ -155,7 +194,7 @@ public class JsoupHtmlParser implements HtmlParser {
         }
         StringBuilder sb = new StringBuilder();
         for (int i = start+1; i <= end; i++) {
-            sb.append(" <b>").append(i).append("</b> ")
+            sb.append(" <span class=\"v\"> <b>").append(i).append("</b> </span> ")
                     .append("\uF850").append(see).append(" ")
                     .append(chapterNumberOnly).append(':').append(firstVerse)
                     .append("\uF851 ");

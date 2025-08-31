@@ -30,4 +30,6 @@ public interface HtmlParser {
     void addTextBeforeIfSomeChecksTrue(TagAttribute tagToSearch, String classToCheck, TagAttribute subTagToCheckAttribute, TagAttribute subTagToCheckClass, String textToAdd);
     void addSiblingBefore(TagAttribute tag, String text);
     void handleUnitedVerses(String dash, String see);
+
+    void checkTotalVerses(List<Integer> chaptersSize, String book);
 }
