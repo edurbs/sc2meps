@@ -243,13 +243,11 @@ public class FormatBookUseCase implements FormatBook {
         // Place all footnote text at the end of the Bible book.        
         var tagFootnoteOriginal = new TagAttribute("div", "type", "footnote");
         List<String> allTextFootnote = htmlParser.getTextTags(tagFootnoteOriginal);
-        StringBuilder mepsFootnotes = getStringBuilder(allTextFootnote);
+        StringBuilder mepsFootnotes = getNotes(allTextFootnote);
         htmlParser.addHtmlAtEnd(mepsFootnotes.toString());        
-//        var tagFootnoteReferenceSymbol = new TagAttribute("sup", TAG_ATTR_CLASS, "footnote");
-//        htmlParser.addSiblingBefore(tagFootnoteOriginal, "*");
     }
 
-    private StringBuilder getStringBuilder(List<String> allTextFootnote) {
+    private StringBuilder getNotes(List<String> allTextFootnote) {
         StringBuilder mepsFootnotes = new StringBuilder();
         for (String textFootnote : allTextFootnote) {
             String subStringUntilFirstSpace = textFootnote.substring(0, textFootnote.indexOf(" "));

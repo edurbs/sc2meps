@@ -433,6 +433,9 @@ public class JsoupHtmlParser implements HtmlParser {
 
     @Override
     public void addHtmlAtEnd(String html) {
+        String div = document.outerHtml();
+        document.empty();
+        document.body().append(div);
         document.body().append(html);
     }
 
