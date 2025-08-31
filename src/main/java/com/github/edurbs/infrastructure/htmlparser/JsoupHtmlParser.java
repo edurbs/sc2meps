@@ -64,7 +64,6 @@ public class JsoupHtmlParser implements HtmlParser {
         for (Element elementUnited : getElements(spanClassV)){
             isChapterEnd = isIsChapterEnd(dash, see, elementUnited, isChapterEnd, isFirstVerseOfChapter);
         }
-        // TODO fix when united verse is in the first verse
         isChapterEnd = false;
         isFirstVerseOfChapter = true;
         TagAttribute chapterTag = new TagAttribute("span", "class", "c-drop");
