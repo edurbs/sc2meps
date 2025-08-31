@@ -150,7 +150,7 @@ public class FormatBookUseCase implements FormatBook {
 
     private void handleUnitedVerses() {
         String dash = "-";
-        String see = "ꞌMadâꞌâ";
+        String see = "Is";
         htmlParser.handleUnitedVerses(dash, see);
     }
 

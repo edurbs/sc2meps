@@ -122,7 +122,7 @@ public class JsoupHtmlParser implements HtmlParser {
             logger.error("Error parsing verse references for {} {}:{}-{}", see, chapterInfo.chapterId, firstVerse, finalVerse);
             return isChapterEnd;
         }
-        addVerseReferences(elementUnited, afterFinalVerse, sb, isChapterEnd);
+        addVerseReferences(elementUnited, afterFinalVerse, sb, isChapterEnd, isFirstVerseOfChapter);
         isChapterEnd = false;
         return isChapterEnd;
     }
@@ -184,7 +184,7 @@ public class JsoupHtmlParser implements HtmlParser {
         ));
     }
 
-    private void addVerseReferences(Element elementUnited, Element verseAfterFinalVerseElement, StringBuilder sb, boolean isInChapterEnd) {
+    private void addVerseReferences(Element elementUnited, Element verseAfterFinalVerseElement, StringBuilder sb, boolean isInChapterEnd, boolean isFirstVerseOfChapter) {
         Element elementUnitedParent = elementUnited.parent();
         if(elementUnitedParent==null){
             return;
@@ -199,7 +199,7 @@ public class JsoupHtmlParser implements HtmlParser {
         }
         if(isInChapterEnd){
             verseAfterFinalVerseElement.append(sb.toString());
-        }else if(grandParentElementUnited.equals(grandParentVerseAfterFinalVerseElement)){
+        }else if(isFirstVerseOfChapter || grandParentElementUnited.equals(grandParentVerseAfterFinalVerseElement)){
             verseAfterFinalVerseElement.prepend(sb.toString());
         }else{
             grandParentElementUnited.append(sb.toString());
