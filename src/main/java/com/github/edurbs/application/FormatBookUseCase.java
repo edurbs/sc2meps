@@ -73,6 +73,7 @@ public class FormatBookUseCase implements FormatBook {
         // step 4.A.2
         // For books not containing chapters, add verse number one to the beginning of
         // the first verse, if it has not been included in the pasted text.
+        // TODO Remover numero do capitulo quando tiver só 1 capítulo
         addVerseNumberOneIfMissing();
         
         // step 4.A.3.a
@@ -94,9 +95,7 @@ public class FormatBookUseCase implements FormatBook {
 
         // step 4.B Headings
         // Place a Dollar sign ($) at the start of a line with a superscription.
-        //addDollarSignToSuperscription();
-
-
+        addDollarSignToSuperscription();
 
         // step 4.B Headings
         // Place an At sign (@) at the start of a line with any heading other than a
@@ -110,8 +109,12 @@ public class FormatBookUseCase implements FormatBook {
 
         handleUnitedVerses();
 
+        // TODO fix invaid chapters
+        fixInvalidChapters();
+
         // each chapter must have the correct number of scriptures
         checkChapterSize();
+
 
         // step 4.B Body text
         // Place a Plus sign (+) at the start of a line when body text immediately follows any type of heading.
@@ -140,6 +143,22 @@ public class FormatBookUseCase implements FormatBook {
         
     }
 
+    private void fixInvalidChapters() {
+        // TODO
+        List<String> chapters = getChapters();
+        List<String> validChapters = new ArrayList<>();
+        for (String chapter : chapters) {
+            htmlParser.readHtml(chapter);
+            int chapterNumber = getChapterNumber();
+            if(chapterNumber==0 && scriptureEarthBookName.getChapters()>1){
+                continue;
+            }
+            validChapters.add(htmlParser.getHtml());
+        }
+        String chapterHtml = addBookHtml(validChapters);
+        htmlParser.readHtml(chapterHtml);
+    }
+
     private void checkChapterSize() {
         List<Integer> chaptersSize = new ArrayList<>();
         for (int chapterNumber = 1; chapterNumber <= scriptureEarthBookName.getChapters(); chapterNumber++) {
@@ -150,7 +169,7 @@ public class FormatBookUseCase implements FormatBook {
 
     private void handleUnitedVerses() {
         String dash = "-";
-        String see = "Is";
+        String see = "ꞌMadâꞌâ";
         htmlParser.handleUnitedVerses(dash, see);
     }
 
@@ -275,15 +294,15 @@ public class FormatBookUseCase implements FormatBook {
     }
 
     private void addDollarSignToSuperscription() {
-        //boolean isNotPsalm = !scriptureEarthBookName.equals(ScriptureEarthBookName.BOOK_PSA);
-//        if (isNotPsalm) {
-//            return;
-//        }
+        boolean isNotPsalm = !scriptureEarthBookName.equals(ScriptureEarthBookName.BOOK_PSA);
+        if (isNotPsalm) {
+            return;
+        }
         List<String> chapters = getChapters();
         List<String> formattedChapters = new ArrayList<>();
         for (String chapter : chapters) {
             htmlParser.readHtml(chapter);
-            int chapterNumber = getFirstChapterNumber();
+            int chapterNumber = getChapterNumber();
             if(chapterNumber==0){
                 continue;
             }
@@ -292,7 +311,7 @@ public class FormatBookUseCase implements FormatBook {
             }
             formattedChapters.add(htmlParser.getHtml());
         }
-        String chapterHtml = addPsalmHtml(formattedChapters);
+        String chapterHtml = addBookHtml(formattedChapters);
         htmlParser.readHtml(chapterHtml);
     }
 
@@ -301,17 +320,21 @@ public class FormatBookUseCase implements FormatBook {
         return htmlParser.getHtmlTags(chapterDivisionTag);
     }
 
-    private int getFirstChapterNumber() {
+    private int getChapterNumber() {
         var chapterTag = new TagAttribute("span", TAG_ATTR_CLASS, CLASS_C_DROP);
         String stringChapterNumber = htmlParser.getTagText(chapterTag);
-        if (stringChapterNumber.isEmpty()) {
+        if (stringChapterNumber.isEmpty() && scriptureEarthBookName.getChapters()>1) {
             return 0;
+        }else if(stringChapterNumber.isEmpty() && scriptureEarthBookName.getChapters()==1){
+            return 1;
         }
         stringChapterNumber = stringChapterNumber.replace("{", "").replace("}", "");
+        String[] parts = stringChapterNumber.split(" ");
+        stringChapterNumber = parts[0];
         return Integer.parseInt(stringChapterNumber);
     }
 
-    private String addPsalmHtml(List<String> formattedChapters) {
+    private String addBookHtml(List<String> formattedChapters) {
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
         sb.append("<head>");
@@ -324,8 +347,10 @@ public class FormatBookUseCase implements FormatBook {
         }
         sb.append("</head>");
         sb.append("<body>");
-        sb.append("<div class=\"mt\"><span class=\"percent\">%</span><span class=\"mt\">");
-        sb.append("<b>Salmu</b>");
+        //sb.append("<div class=\"mt\"><span class=\"percent\">%</span><span class=\"mt\">");
+        sb.append("<div class=\"mt99\"><span class=\"mt\">");
+        String bookName = htmlParser.getTagText(new TagAttribute("span", TAG_ATTR_CLASS, "mt"));
+        sb.append("<b>").append(bookName).append("</b>");
         sb.append("</span></div>");
         sb.append(String.join("\n", formattedChapters));
         sb.append("</body></html>");
@@ -358,7 +383,7 @@ public class FormatBookUseCase implements FormatBook {
         int ordinal = scriptureEarthBookName.getMepsName().getOrdinal();
         String ordinalWithTwoNumbers = String.format("%02d", ordinal);
         String lineHeader = "%%%s".formatted(ordinalWithTwoNumbers);
-        var tagTitle = new TagAttribute("div", TAG_ATTR_CLASS, "mt");
+        var tagTitle = new TagAttribute("div", TAG_ATTR_CLASS, "mt99");
         htmlParser.addTagBefore(tagTitle, new TagAttribute("div", TAG_ATTR_CLASS, "mepsCode"), lineHeader);
     }
 
@@ -374,9 +399,10 @@ public class FormatBookUseCase implements FormatBook {
 
     private void addVerseNumberOneIfMissing() {
         if (scriptureEarthBookName.getChapters() == 1) {
-            var tagAttribute = new TagAttribute("span", TAG_ATTR_CLASS, CLASS_C_DROP);
-            var newTagAttribute = new TagAttribute("span", TAG_ATTR_CLASS, "v");
-            htmlParser.addTagAfter(tagAttribute, newTagAttribute, "1");
+            var tagChapter = new TagAttribute("span", TAG_ATTR_CLASS, CLASS_C_DROP);
+            var tagFirstVerde = new TagAttribute("span", TAG_ATTR_CLASS, "v");
+            htmlParser.addTagAfter(tagChapter, tagFirstVerde, "1");
+            htmlParser.removeTag(tagChapter);
         }
     }
 
@@ -412,7 +438,7 @@ public class FormatBookUseCase implements FormatBook {
 
     private void removeInlineNotes() {
         TagAttribute tagInlineNote = new TagAttribute("span", "data-graft", "");
-        htmlParser.changeTagAndText(tagInlineNote, "span", "*");
+        htmlParser.changeTagAndText(tagInlineNote, "span", "* ");
     }
 
     private void removeCss(){
