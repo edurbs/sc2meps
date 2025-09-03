@@ -109,7 +109,6 @@ public class FormatBookUseCase implements FormatBook {
 
         handleUnitedVerses();
 
-        // TODO fix invaid chapters
         fixInvalidChapters();
 
         // each chapter must have the correct number of scriptures
@@ -144,16 +143,34 @@ public class FormatBookUseCase implements FormatBook {
     }
 
     private void fixInvalidChapters() {
-        // TODO
         List<String> chapters = getChapters();
         List<String> validChapters = new ArrayList<>();
-        for (String chapter : chapters) {
-            htmlParser.readHtml(chapter);
-            int chapterNumber = getChapterNumber();
-            if(chapterNumber==0 && scriptureEarthBookName.getChapters()>1){
-                continue;
+        for(int chapterNumber = 1; chapterNumber <= scriptureEarthBookName.getChapters(); chapterNumber++){
+            int chapterNumberFromHtml = -1;
+            String chapterHtml = "";
+            for(String chapter : chapters){
+                htmlParser.readHtml(chapter);
+                chapterNumberFromHtml = getChapterNumber();
+                if(chapterNumberFromHtml==0 && scriptureEarthBookName.getChapters()==1 && chapterNumber==1){
+                    return;
+                }
+                if(chapterNumberFromHtml==chapterNumber){
+                    chapterHtml = htmlParser.getHtml();
+                    break;
+                }
             }
-            validChapters.add(htmlParser.getHtml());
+            if(chapterHtml.isBlank()){
+                StringBuilder newChapter = new StringBuilder();
+                StringBuilder verses = new StringBuilder();
+                for(int verse = 1; verse <= scriptureEarthBookName.getNumberOfScriptures(chapterNumber); verse++){
+                    verses.append("<b>%s</b> <span>--</span> ".formatted(verse));
+                }
+                newChapter.append("<div class=\"chapter\" id=\"chapter-%d\">{%d} %s</div>".formatted(chapterNumber, chapterNumber, verses));
+                chapterHtml = newChapter.toString();
+            }
+            if(!chapterHtml.isBlank()){
+                validChapters.add(chapterHtml);
+            }
         }
         String chapterHtml = addBookHtml(validChapters);
         htmlParser.readHtml(chapterHtml);
