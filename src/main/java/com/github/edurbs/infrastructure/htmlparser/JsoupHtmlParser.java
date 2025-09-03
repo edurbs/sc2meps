@@ -50,17 +50,19 @@ public class JsoupHtmlParser implements HtmlParser {
             Integer versesFound = verses.size()+(numberOfChapters==1 ? 0 : 1);
             Integer totalVerses = chaptersSize.get(chapterNumber - 1);
             if(!Objects.equals(totalVerses, versesFound)){
-                if(versesFound > totalVerses) {
-                    logger.error("In book {}, chapter {} has {} verses, but should have {}", book, chapterNumber, versesFound, totalVerses);
-                }else{
-                    addVerses(chapterNumber, versesFound, totalVerses);
+                logger.error("In book {}, chapter {} has {} verses, but should have {}", book, chapterNumber, versesFound, totalVerses);
+                if(versesFound < totalVerses) {
+                    addVerses(chapter, chapterNumber, versesFound, totalVerses);
                 }
             }
         });
     }
 
-    private void addVerses(int chapterNumber, Integer versesFound, Integer totalVerses) {
-    // TODO add verses
+    private void addVerses(Element chapter, int chapterNumber, Integer versesFound, Integer totalVerses) {
+        for(int i=versesFound; i<=totalVerses; i++){
+            String newVerse = "<span class=\"v\"><b>%d</b></span> <span>--</span> ".formatted(i);
+            chapter.append(newVerse);
+        }
     }
 
     @Override

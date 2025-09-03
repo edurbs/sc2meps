@@ -73,7 +73,6 @@ public class FormatBookUseCase implements FormatBook {
         // step 4.A.2
         // For books not containing chapters, add verse number one to the beginning of
         // the first verse, if it has not been included in the pasted text.
-        // TODO Remover numero do capitulo quando tiver só 1 capítulo
         addVerseNumberOneIfMissing();
         
         // step 4.A.3.a
@@ -163,7 +162,7 @@ public class FormatBookUseCase implements FormatBook {
                 StringBuilder newChapter = new StringBuilder();
                 StringBuilder verses = new StringBuilder();
                 for(int verse = 1; verse <= scriptureEarthBookName.getNumberOfScriptures(chapterNumber); verse++){
-                    verses.append("<b>%s</b> <span>--</span> ".formatted(verse));
+                    verses.append("<span class=\"v\"><b>%s</b></span> <span>--</span> ".formatted(verse));
                 }
                 newChapter.append("<div class=\"chapter\" id=\"chapter-%d\">{%d} %s</div>".formatted(chapterNumber, chapterNumber, verses));
                 chapterHtml = newChapter.toString();
