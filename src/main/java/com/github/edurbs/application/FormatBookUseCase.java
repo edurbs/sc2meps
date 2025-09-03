@@ -113,7 +113,6 @@ public class FormatBookUseCase implements FormatBook {
         // each chapter must have the correct number of scriptures
         checkChapterSize();
 
-
         // step 4.B Body text
         // Place a Plus sign (+) at the start of a line when body text immediately follows any type of heading.
         addPlusSignAfterHeadings();
@@ -139,6 +138,7 @@ public class FormatBookUseCase implements FormatBook {
         }
 
         fixGlotal();
+        htmlParser.addHtmlAtEnd("");
         html = htmlParser.getHtml();
         
     }
@@ -151,15 +151,16 @@ public class FormatBookUseCase implements FormatBook {
         List<String> chapters = getChapters();
         List<String> validChapters = new ArrayList<>();
         for(int chapterNumber = 1; chapterNumber <= scriptureEarthBookName.getChapters(); chapterNumber++){
+            boolean addSuperscription = scriptureEarthBookName.equals(ScriptureEarthBookName.BOOK_PSA) && Superscription.thisChapterHas(chapterNumber);
             int chapterNumberFromHtml = -1;
             String chapterHtml = "";
             for(String chapter : chapters){
                 htmlParser.readHtml(chapter);
                 chapterNumberFromHtml = getChapterNumber();
-                if(chapterNumberFromHtml==0 && scriptureEarthBookName.getChapters()==1 && chapterNumber==1){
-                    return;
-                }
-                if(chapterNumberFromHtml==chapterNumber){
+//                if(chapterNumberFromHtml==0 && scriptureEarthBookName.getChapters()==1 && chapterNumber==1){
+//                    break;
+//                }
+                if(chapterNumberFromHtml==chapterNumber || (chapterNumberFromHtml==0 && scriptureEarthBookName.getChapters()==1 && chapterNumber==1)){
                     chapterHtml = htmlParser.getHtml();
                     break;
                 }
@@ -167,8 +168,15 @@ public class FormatBookUseCase implements FormatBook {
             if(chapterHtml.isBlank()){
                 StringBuilder newChapter = new StringBuilder();
                 StringBuilder verses = new StringBuilder();
+                if(addSuperscription){
+                    newChapter.append("<div class=\"d\"><span class=\"superscription\">$</span></div>");
+                }
                 for(int verse = 1; verse <= scriptureEarthBookName.getNumberOfScriptures(chapterNumber); verse++){
-                    verses.append("<span class=\"v\"><b>%s</b></span> <span>--</span> ".formatted(verse));
+                    String verseNumber = Integer.toString(verse);
+                    if(verse==1){
+                        verseNumber = "";
+                    }
+                    verses.append(" <span class=\"v\"><b>%s</b></span> <span> -- </span> ".formatted(verseNumber));
                 }
                 newChapter.append("<div class=\"chapter\" id=\"chapter-%d\">{%d} %s</div>".formatted(chapterNumber, chapterNumber, verses));
                 chapterHtml = newChapter.toString();
@@ -177,7 +185,7 @@ public class FormatBookUseCase implements FormatBook {
                 validChapters.add(chapterHtml);
             }
         }
-        String chapterHtml = addBookHtml(validChapters,"");
+        String chapterHtml = addBookHtml(validChapters);
         htmlParser.readHtml(chapterHtml);
     }
 
@@ -333,7 +341,7 @@ public class FormatBookUseCase implements FormatBook {
             }
             formattedChapters.add(htmlParser.getHtml());
         }
-        String chapterHtml = addBookHtml(formattedChapters,"Salmu");
+        String chapterHtml = addBookHtml(formattedChapters);
         htmlParser.readHtml(chapterHtml);
     }
 
@@ -356,7 +364,7 @@ public class FormatBookUseCase implements FormatBook {
         return Integer.parseInt(stringChapterNumber);
     }
 
-    private String addBookHtml(List<String> formattedChapters, String salmu) {
+    private String addBookHtml(List<String> formattedChapters) {
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
         sb.append("<head>");
@@ -369,9 +377,6 @@ public class FormatBookUseCase implements FormatBook {
         }
         sb.append("</head>");
         sb.append("<body>");
-        if(!salmu.isEmpty()){
-            sb.append("<div class=\"mt\"><span class=\"percent\">%%</span><span class=\"mt\"><b>%s</b></span>".formatted(salmu));
-        }
         sb.append("<div class=\"mt99\"><span class=\"mt\">");
         String bookName = htmlParser.getTagText(new TagAttribute("span", TAG_ATTR_CLASS, "mt"));
         sb.append("<b>").append(bookName).append("</b>");
@@ -387,7 +392,8 @@ public class FormatBookUseCase implements FormatBook {
         if (superscriptionText.isEmpty()) {
             // add empy string before the tag div class m
             var tagM = new TagAttribute("div", TAG_ATTR_CLASS, "m");
-            htmlParser.addTagBefore(tagM, new TagAttribute("div", TAG_ATTR_CLASS, "d"), "$");    
+            String stringTagM = htmlParser.getTagText(tagM);
+            htmlParser.addTagBefore(tagM, new TagAttribute("div", TAG_ATTR_CLASS, "d"), "$");
         }else{
             htmlParser.addTagBefore(tagSuperscription, new TagAttribute("span", TAG_ATTR_CLASS, "superscription"), "$");
         }

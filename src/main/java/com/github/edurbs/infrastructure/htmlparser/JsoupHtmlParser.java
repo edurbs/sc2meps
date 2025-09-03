@@ -59,8 +59,12 @@ public class JsoupHtmlParser implements HtmlParser {
     }
 
     private void addVerses(Element chapter, int chapterNumber, Integer versesFound, Integer totalVerses) {
-        for(int i=versesFound; i<=totalVerses; i++){
-            String newVerse = "<span class=\"v\"><b>%d</b></span> <span>--</span> ".formatted(i);
+        for(int i=versesFound+1; i<=totalVerses; i++){
+            String verseNumber = Integer.toString(i);
+            if(i==1){
+                verseNumber = "";
+            }
+            String newVerse = " <span class=\"v\"><b>%s</b></span> <span> -- </span> ".formatted(verseNumber);
             chapter.append(newVerse);
         }
     }
