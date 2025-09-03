@@ -50,9 +50,17 @@ public class JsoupHtmlParser implements HtmlParser {
             Integer versesFound = verses.size()+(numberOfChapters==1 ? 0 : 1);
             Integer totalVerses = chaptersSize.get(chapterNumber - 1);
             if(!Objects.equals(totalVerses, versesFound)){
-                logger.error("In book {}, chapter {} has {} verses, but should have {}", book, chapterNumber, versesFound, totalVerses);
+                if(versesFound > totalVerses) {
+                    logger.error("In book {}, chapter {} has {} verses, but should have {}", book, chapterNumber, versesFound, totalVerses);
+                }else{
+                    addVerses(chapterNumber, versesFound, totalVerses);
+                }
             }
         });
+    }
+
+    private void addVerses(int chapterNumber, Integer versesFound, Integer totalVerses) {
+    // TODO add verses
     }
 
     @Override
