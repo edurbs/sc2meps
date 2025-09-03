@@ -137,8 +137,14 @@ public class FormatBookUseCase implements FormatBook {
             removeCss();
             removeInlineNotes();
         }
+
+        fixGlotal();
         html = htmlParser.getHtml();
         
+    }
+
+    private void fixGlotal() {
+        htmlParser.replace("'","ꞌ");
     }
 
     private void fixInvalidChapters() {
@@ -171,7 +177,7 @@ public class FormatBookUseCase implements FormatBook {
                 validChapters.add(chapterHtml);
             }
         }
-        String chapterHtml = addBookHtml(validChapters);
+        String chapterHtml = addBookHtml(validChapters,"");
         htmlParser.readHtml(chapterHtml);
     }
 
@@ -327,7 +333,7 @@ public class FormatBookUseCase implements FormatBook {
             }
             formattedChapters.add(htmlParser.getHtml());
         }
-        String chapterHtml = addBookHtml(formattedChapters);
+        String chapterHtml = addBookHtml(formattedChapters,"Salmu");
         htmlParser.readHtml(chapterHtml);
     }
 
@@ -350,7 +356,7 @@ public class FormatBookUseCase implements FormatBook {
         return Integer.parseInt(stringChapterNumber);
     }
 
-    private String addBookHtml(List<String> formattedChapters) {
+    private String addBookHtml(List<String> formattedChapters, String salmu) {
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
         sb.append("<head>");
@@ -363,7 +369,9 @@ public class FormatBookUseCase implements FormatBook {
         }
         sb.append("</head>");
         sb.append("<body>");
-        //sb.append("<div class=\"mt\"><span class=\"percent\">%</span><span class=\"mt\">");
+        if(!salmu.isEmpty()){
+            sb.append("<div class=\"mt\"><span class=\"percent\">%%</span><span class=\"mt\"><b>%s</b></span>".formatted(salmu));
+        }
         sb.append("<div class=\"mt99\"><span class=\"mt\">");
         String bookName = htmlParser.getTagText(new TagAttribute("span", TAG_ATTR_CLASS, "mt"));
         sb.append("<b>").append(bookName).append("</b>");
